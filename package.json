@@ -49,7 +49,7 @@
     "@aws-cdk/aws-ssm": "^1.4.0",
     "@aws-cdk/core": "^1.4.0",
     "@bifravst/code-style": "^2.2.0",
-    "@bifravst/random-words": "^2.0.1",
+    "@bifravst/random-words": "^3.0.0",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-angular": "^8.1.0",
     "@nrfcloud/package-layered-lambdas": "^1.2.0",
