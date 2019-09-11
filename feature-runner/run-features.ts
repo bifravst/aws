@@ -62,20 +62,26 @@ program
 				],
 			})
 
-			const { success } = await runner
-				.addStepRunners(
-					cognitoStepRunners<StackOutputs & { region: string }>({
-						...world,
-						emailAsUsername: true,
-					}),
-				)
-				.addStepRunners(awsSdkStepRunners(world))
-				.run()
-			if (!success) {
+			try {
+				const { success } = await runner
+					.addStepRunners(
+						cognitoStepRunners<StackOutputs & { region: string }>({
+							...world,
+							emailAsUsername: true,
+						}),
+					)
+					.addStepRunners(awsSdkStepRunners(world))
+					.run()
+				if (!success) {
+					process.exit(1)
+					return
+				}
+				process.exit()
+			} catch (error) {
+				console.error(chalk.red('Running the features failed!'))
+				console.error(error)
 				process.exit(1)
-				return
 			}
-			process.exit()
 		},
 	)
 	.parse(process.argv)
