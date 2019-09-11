@@ -12,6 +12,8 @@ jobs:
         run: sudo npm install -g npm@
       - name: Install dependencies
         run: npm ci --no-audit
+      - name: Compile
+        run: npx tsc
       - name: Test
         run: npm test
       - name: Set up stack for End-to-End tests
@@ -23,7 +25,6 @@ jobs:
           STACK_ID: bifravst-${{ github.sha }}
         run: |
           printenv
-          npx tsc
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk deploy --require-approval never
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
@@ -31,11 +32,8 @@ jobs:
       - name: End-to-End Tests
         run: |
           npm run test:e2e
-      - name: clean up test resources
-        if: always()
-        run: |
-          npx cdk -a 'node dist/aws/cloudformation-test.js' destroy -f '*'
       - name: Semantic release
+        if: success()
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,3 +41,7 @@ jobs:
         run: |
           npm i --no-save semantic-release@next
           npx semantic-release
+      - name: clean up test resources
+        if: always()
+        run: |
+          npx cdk -a 'node dist/aws/cloudformation-test.js' destroy -f '*'
