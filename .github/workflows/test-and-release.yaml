@@ -43,5 +43,5 @@ jobs:
       - name: Clean up End-to-End test resources
         if: always()
         run: |
-          npx cdk -a 'node dist/aws/cloudformation-sourcecode.js' destroy -f '*'
-          npx cdk -a 'node dist/aws/cloudformation-test.js' destroy -f '*'
+          npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' destroy -f '*'
+          npx cdk -a 'node dist/cdk/cloudformation-test.js' destroy -f '*'
