@@ -77,14 +77,13 @@
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -e",
-      "pre-commit": "lint-staged && npm test"
+      "pre-commit": "npx tsc && lint-staged && npm test"
     }
   },
   "lint-staged": {
     "*.ts": [
       "prettier --write",
       "eslint --ext .js,.ts",
-      "npx tsc",
       "git add"
     ],
     "*.{md,json,yaml,yml}": [
