@@ -22,11 +22,16 @@ jobs:
           AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
           STACK_ID: bifravst-${{ github.sha }}
         run: |
-          printenv
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup
       - name: End-to-End Tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-central-1
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+          STACK_ID: bifravst-${{ github.sha }}
         run: |
           npm run test:e2e
       - name: Semantic release
@@ -40,6 +45,12 @@ jobs:
           npx semantic-release
       - name: Clean up End-to-End test resources
         if: always()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-central-1
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+          STACK_ID: bifravst-${{ github.sha }}
         run: |
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' destroy -f '*'
           npx cdk -a 'node dist/cdk/cloudformation-test.js' destroy -f '*'
