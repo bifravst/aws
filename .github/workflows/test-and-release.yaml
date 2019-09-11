@@ -26,7 +26,6 @@ jobs:
         run: |
           printenv
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
-          npx cdk deploy --require-approval never
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup
       - name: End-to-End Tests
@@ -41,7 +40,8 @@ jobs:
         run: |
           npm i --no-save semantic-release@next
           npx semantic-release
-      - name: clean up test resources
+      - name: Clean up End-to-End test resources
         if: always()
         run: |
+          npx cdk -a 'node dist/aws/cloudformation-sourcecode.js' destroy -f '*'
           npx cdk -a 'node dist/aws/cloudformation-test.js' destroy -f '*'

@@ -1,13 +1,20 @@
 import { App } from '@aws-cdk/core'
-import { TestStack } from '../stacks/Test'
+import { BifravstStack } from '../stacks/Bifravst'
+import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
+import { BifravstLambdas } from '../prepare-resources'
 
 /**
- * This app provides resources used only for end-to-end tests
+ * This sets up the parts of the app needed for the end-to-end tests
  */
 export class TestApp extends App {
-	public constructor(args: { stackId: string }) {
+	public constructor(args: {
+		stackId: string
+		mqttEndpoint: string
+		sourceCodeBucketName: string
+		baseLayerZipFileName: string
+		lambdas: LayeredLambdas<BifravstLambdas>
+	}) {
 		super()
-
-		new TestStack(this, args.stackId)
+		new BifravstStack(this, args.stackId, args)
 	}
 }
