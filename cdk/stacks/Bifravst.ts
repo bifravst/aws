@@ -58,8 +58,18 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
 			userPool: userPool,
-			enabledAuthFlows: [Cognito.AuthFlow.USER_PASSWORD],
+			enabledAuthFlows: [
+				Cognito.AuthFlow.USER_PASSWORD,
+				Cognito.AuthFlow.ADMIN_NO_SRP,
+			],
 		})
+		const developerProviderName = 'developerAuthenticated'
+
+		new CloudFormation.CfnOutput(this, 'developerProviderName', {
+			value: developerProviderName,
+			exportName: `${this.stackName}:developerProviderName`,
+		})
+
 		const identityPool = new Cognito.CfnIdentityPool(this, 'identityPool', {
 			identityPoolName: id,
 			allowUnauthenticatedIdentities: false,
@@ -69,6 +79,7 @@ export class BifravstStack extends CloudFormation.Stack {
 					providerName: userPool.userPoolProviderName,
 				},
 			],
+			developerProviderName,
 		})
 
 		const userRole = new IAM.Role(this, 'userRole', {
@@ -385,6 +396,7 @@ export type StackOutputs = {
 	mqttEndpoint: string
 	userPoolId: string
 	identityPoolId: string
+	developerProviderName: string
 	userPoolClientId: string
 	webAppBucketName: string
 	cloudfrontDistributionIdWebApp: string
