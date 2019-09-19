@@ -28,7 +28,7 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@bifravst/athena-helpers": "^4.0.2",
+    "@bifravst/athena-helpers": "^5.0.0",
     "@bifravst/modemtalk": "^1.0.1",
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.531.0",
@@ -50,7 +50,7 @@
     "@aws-cdk/aws-s3": "^1.8.0",
     "@aws-cdk/aws-ssm": "^1.8.0",
     "@aws-cdk/core": "^1.8.0",
-    "@bifravst/code-style": "^3.1.0",
+    "@bifravst/code-style": "^4.0.0",
     "@bifravst/random-words": "^4.0.0",
     "@coderbyheart/bdd-feature-runner-aws": "^4.0.0",
     "@commitlint/cli": "^8.2.0",
