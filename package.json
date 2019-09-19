@@ -52,7 +52,7 @@
     "@aws-cdk/core": "^1.8.0",
     "@bifravst/code-style": "^3.0.1",
     "@bifravst/random-words": "^3.0.1",
-    "@coderbyheart/bdd-feature-runner-aws": "^3.0.0",
+    "@coderbyheart/bdd-feature-runner-aws": "^4.0.0",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-angular": "^8.1.0",
     "@nrfcloud/package-layered-lambdas": "^1.2.0",
