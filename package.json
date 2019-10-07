@@ -37,7 +37,7 @@
     "modemtalk": "^1.1.6"
   },
   "devDependencies": {
-    "@aws-cdk/aws-athena": "^1.11.0",
+    "@aws-cdk/aws-athena": "^1.12.0",
     "@aws-cdk/aws-cloudfront": "^1.11.0",
     "@aws-cdk/aws-codebuild": "^1.11.0",
     "@aws-cdk/aws-codepipeline": "^1.11.0",
