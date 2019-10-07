@@ -47,7 +47,7 @@
     "@aws-cdk/aws-iot": "^1.12.0",
     "@aws-cdk/aws-s3": "^1.12.0",
     "@aws-cdk/aws-ssm": "^1.12.0",
-    "@aws-cdk/core": "^1.11.0",
+    "@aws-cdk/core": "^1.12.0",
     "@bifravst/code-style": "^4.1.2",
     "@bifravst/package-layered-lambdas": "^2.1.1",
     "@coderbyheart/bdd-feature-runner-aws": "^8.0.0",
