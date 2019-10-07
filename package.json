@@ -44,7 +44,7 @@
     "@aws-cdk/aws-cognito": "^1.12.0",
     "@aws-cdk/aws-events-targets": "^1.12.0",
     "@aws-cdk/aws-iam": "^1.12.0",
-    "@aws-cdk/aws-iot": "^1.11.0",
+    "@aws-cdk/aws-iot": "^1.12.0",
     "@aws-cdk/aws-s3": "^1.11.0",
     "@aws-cdk/aws-ssm": "^1.11.0",
     "@aws-cdk/core": "^1.11.0",
