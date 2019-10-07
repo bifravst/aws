@@ -41,7 +41,7 @@
     "@aws-cdk/aws-cloudfront": "^1.12.0",
     "@aws-cdk/aws-codebuild": "^1.12.0",
     "@aws-cdk/aws-codepipeline": "^1.12.0",
-    "@aws-cdk/aws-cognito": "^1.11.0",
+    "@aws-cdk/aws-cognito": "^1.12.0",
     "@aws-cdk/aws-events-targets": "^1.11.0",
     "@aws-cdk/aws-iam": "^1.11.0",
     "@aws-cdk/aws-iot": "^1.11.0",
