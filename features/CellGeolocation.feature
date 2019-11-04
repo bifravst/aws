@@ -10,27 +10,19 @@ Feature: Cell Geolocation
         Given I am run after the "Connect a Cat Tracker" feature
         And I am run after the "Device: Update Shadow" feature
 
-    Scenario: Device has an older GPS position from where it starts to move into a cell
-
+    Scenario: Device has a shadow
         Given the cat tracker is connected
         Then the cat tracker updates its reported state with
             """
             {
-                "gps": {
-                    "v": {
-                        "lng": 7.676833,
-                        "lat": 47.809966,
-                        "acc": 18.625809,
-                        "alt": 443.635193,
-                        "spd": 0.448984,
-                        "hdg": 0
-                    },
-                    "ts": 1572340323000
+                "bat": {
+                    "v": 3781,
+                    "ts": 1567942204010
                 }
             }
             """
 
-    Scenario: Device enters a cell and acquires a GPS fix
+    Scenario: Device enters a cell
 
         Given the cat tracker is connected
         Then the cat tracker updates its reported state with
@@ -45,7 +37,16 @@ Feature: Cell Geolocation
                         "ip": "10.202.80.9"
                     },
                     "ts": 1572340608948
-                },
+                }
+            }
+            """
+
+    Scenario: Device acquires a GPS fix
+
+        Given the cat tracker is connected
+        Then the cat tracker updates its reported state with
+            """
+            {
                 "gps": {
                     "v": {
                         "lng": 7.676834,
@@ -69,7 +70,7 @@ Feature: Cell Geolocation
                 "TableName": "{cellGeoLocationsCacheTable}",
                 "Key": {
                     "cellId": {
-                        "S": "29071842-26211-210"
+                        "S": "29071842-26201-211"
                     }
                 },
                 "ProjectionExpression": "lat,lng"
