@@ -34,6 +34,8 @@ const connect = (mqttEndpoint: string) => (clientId: string) => {
 	})
 }
 
+const shadowRegistrations: { [key: string]: Promise<void> } = {}
+
 export const bifravstStepRunners = ({
 	mqttEndpoint,
 }: {
@@ -136,7 +138,13 @@ export const bifravstStepRunners = ({
 					clearTimeout(timeout)
 					reject(err)
 				})
-				connection.register(catId, {}, async () => {
+				if (!shadowRegistrations[catId]) {
+
+					shadowRegistrations[catId] = new Promise(resolve => {
+						connection.register(catId, {}, resolve)
+					})
+				}
+				shadowRegistrations[catId].then(async () => {
 					await runner.progress('IoT > reported', catId)
 					await runner.progress('IoT > reported', JSON.stringify(reported))
 					connection.update(catId, { state: { reported } })
