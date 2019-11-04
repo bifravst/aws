@@ -15,9 +15,15 @@ Feature: Cell Geolocation
         Then the cat tracker updates its reported state with
             """
             {
-                "bat": {
-                    "v": 3781,
-                    "ts": 1567942204010
+                "roam": {
+                    "v": {
+                        "rsrp": 0,
+                        "area": 1,
+                        "mccmnc": 1,
+                        "cell": 1,
+                        "ip": "10.202.80.9"
+                    },
+                    "ts": 1572340608948
                 }
             }
             """
