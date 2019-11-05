@@ -1,4 +1,3 @@
-@Only
 Feature: Cell Geolocation
 
     GPS fixes will be stored with the cell id
