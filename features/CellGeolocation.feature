@@ -11,8 +11,7 @@ Feature: Cell Geolocation
 
     Scenario: Device enters a cell
 
-        Given the cat tracker is connected
-        And I store "$floor($random() * 100000000)" into "cellId"
+        Given I store "$floor($random() * 100000000)" into "cellId"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
         Then the cat tracker updates its reported state with
@@ -33,8 +32,7 @@ Feature: Cell Geolocation
 
     Scenario: Device acquires a GPS fix
 
-        Given the cat tracker is connected
-        Then the cat tracker updates its reported state with
+        Given the cat tracker updates its reported state with
             """
             {
             "gps": {
