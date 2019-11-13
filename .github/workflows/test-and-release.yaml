@@ -39,7 +39,11 @@ jobs:
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup -d
           node cli register-ca
+      - name: End-to-End Tests (Warmup)
+        run: |
+          npm run test:e2e
       - name: End-to-End Tests
+        if: always()
         run: |
           npm run test:e2e
       - name: Semantic release
