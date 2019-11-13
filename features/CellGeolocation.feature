@@ -49,7 +49,7 @@ Feature: Cell Geolocation
             }
             """
 
-    @Retry=failAfter:20,initialDelay:1000,maxDelay:6000
+    @Retry=failAfter:50,initialDelay:1000,maxDelay:6000
     Scenario: User can resolve the cell
 
         Given I am authenticated with Cognito
