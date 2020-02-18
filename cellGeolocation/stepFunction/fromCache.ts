@@ -3,8 +3,8 @@ import {
 	GetItemCommand,
 } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { CelGeoResponse } from './CelGeoResponse'
-import { CelGeoInput } from './CelGeoInput'
+import { CelGeoResponse } from '../CelGeoResponse'
+import { CelGeoInput } from '../CelGeoInput'
 
 const TableName = process.env.CACHE_TABLE || ''
 const dynamodb = new DynamoDBClient({})

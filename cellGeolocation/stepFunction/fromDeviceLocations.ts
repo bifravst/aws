@@ -1,7 +1,7 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { CelGeoResponse } from './CelGeoResponse'
-import { CelGeoInput } from './CelGeoInput'
+import { CelGeoResponse } from '../CelGeoResponse'
+import { CelGeoInput } from '../CelGeoInput'
 
 const TableName = process.env.LOCATIONS_TABLE || ''
 const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''

@@ -59,7 +59,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.geolocateCellFromCache,
+					lambdas.lambdaZipFileNames.geolocateCellFromCacheStepFunction,
 				),
 				description: 'Geolocate cells from cache',
 				initialPolicy: [
@@ -124,7 +124,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.geolocateCellFromDeviceLocations,
+					lambdas.lambdaZipFileNames
+						.geolocateCellFromDeviceLocationsStepFunction,
 				),
 				description: 'Geolocate cells from device locations',
 				initialPolicy: [
@@ -157,7 +158,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.cacheCellGeolocation,
+					lambdas.lambdaZipFileNames.cacheCellGeolocationStepFunction,
 				),
 				description: 'Caches cell geolocations',
 				initialPolicy: [
@@ -189,7 +190,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					memorySize: 1792,
 					code: Lambda.Code.bucket(
 						sourceCodeBucket,
-						lambdas.lambdaZipFileNames.geolocateCellFromUnwiredLabs,
+						lambdas.lambdaZipFileNames.geolocateCellFromUnwiredLabsStepFunction,
 					),
 					description: 'Resolve cell geolocation using the UnwiredLabs API',
 					initialPolicy: [
