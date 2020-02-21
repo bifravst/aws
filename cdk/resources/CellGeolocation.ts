@@ -10,6 +10,7 @@ import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
 import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
+import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -246,6 +247,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		)
 
 		const stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
+			stateMachineType: StateMachineType.EXPRESS,
 			definition: new StepFunctions.Task(this, 'Resolve from cache', {
 				task: new StepFunctionTasks.InvokeFunction(geolocateCellFromCache),
 				resultPath: '$.cellgeo',
