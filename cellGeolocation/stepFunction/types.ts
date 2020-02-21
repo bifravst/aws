@@ -1,12 +1,10 @@
-import { Cell } from '../geolocateCell'
+import { Cell, Location } from '../geolocateCell'
 
-export type CellGeoInput = { roaming: Cell; deviceId: string }
-
-export type CellGeoResponse = {
+export type CellGeo = {
 	located: boolean
-	area: number
-	mccmnc: number
-	cell: number
-	lat?: number
-	lng?: number
+} & Partial<Location>
+
+export type StateDocument = {
+	deviceId: string
+	roaming: Cell
 }

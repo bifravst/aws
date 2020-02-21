@@ -20,6 +20,7 @@ export type BifravstLambdas = {
 	geolocateCellFromDeviceLocationsStepFunction: string
 	geolocateCellFromUnwiredLabsStepFunction: string
 	cacheCellGeolocationStepFunction: string
+	cacheCellGeolocationFromDeviceIfNewCell: string
 }
 
 export const prepareResources = async ({
@@ -113,6 +114,11 @@ export const prepareResources = async ({
 				'cellGeolocation',
 				'httpApi',
 				'fromCache.ts',
+			),
+			cacheCellGeolocationFromDeviceIfNewCell: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'cacheFromDeviceIfNewCell.ts',
 			),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),
