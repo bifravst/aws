@@ -17,6 +17,7 @@ import {
 } from '../historicalData/settings'
 import { athenaStepRunners } from './steps/athena'
 import { uuidHelper } from './steps/uuidHelper'
+import { STS } from 'aws-sdk'
 
 let ran = false
 
@@ -31,7 +32,6 @@ export type BifravstWorld = StackOutputs & {
 
 const region =
 	process.env.AWS_DEFAULT_REGION || process.env.AWS_REGION || 'eu-central-1'
-const accountId = process.env.AWS_ACCOUNT || ''
 
 program
 	.arguments('<featureDir>')
@@ -61,6 +61,10 @@ program
 				region,
 			})) as StackOutputs
 
+			const { Account: accountId } = await new STS({ region })
+				.getCallerIdentity()
+				.promise()
+
 			const world: BifravstWorld = {
 				...stackConfig,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
@@ -74,7 +78,7 @@ program
 					bifravstStackName: stackName,
 				}),
 				region,
-				accountId,
+				accountId: accountId as string,
 			}
 
 			console.log(chalk.yellow.bold(' World:'))
