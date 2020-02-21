@@ -459,4 +459,5 @@ export type StackOutputs = {
 	historicalDataBucketName: string
 	historicalDataQueryResultsBucketName: string
 	cellGeoLocationsCacheTable: string
+	geolocationApiUrl: string
 }

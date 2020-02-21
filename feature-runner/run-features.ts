@@ -5,6 +5,7 @@ import {
 	cognitoStepRunners,
 	awsSdkStepRunners,
 	storageStepRunners,
+	restStepRunners,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import * as program from 'commander'
 import * as chalk from 'chalk'
@@ -120,6 +121,7 @@ program
 					.addStepRunners(bifravstStepRunners(world))
 					.addStepRunners([uuidHelper])
 					.addStepRunners(storageStepRunners())
+					.addStepRunners(restStepRunners())
 					.run()
 				if (!success) {
 					process.exit(1)

@@ -8,6 +8,7 @@ export enum ErrorType {
 export type ErrorInfo = {
 	type: ErrorType
 	message: string
+	detail?: any
 }
 
 export const toStatusCode = {
