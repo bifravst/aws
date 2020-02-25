@@ -30,11 +30,14 @@ const inputSchema = new Ajv().compile({
 		},
 	},
 	required: ['cell', 'area', 'mccmnc'],
-	additionalProperties: false
+	additionalProperties: false,
 })
 
 const allMembersToInt = (o: object) =>
-	Object.entries(o).reduce((o, [k, v]) => ({ ...o, [k]: parseInt(v, 10) }), {})
+	Object.entries(o).reduce(
+		(o, [k, v]) => ({ ...o, [k]: v ? parseInt(v, 10) : 0 }),
+		{},
+	)
 
 export const handler = async (
 	event: APIGatewayProxyEvent,

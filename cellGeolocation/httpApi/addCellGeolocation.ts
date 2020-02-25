@@ -59,6 +59,9 @@ const inputSchema = new Ajv().compile({
 	additionalProperties: false,
 })
 
+const toIntOr0 = (v?: any) => (v ? parseInt(v, 10) : 0)
+const toFloatOr0 = (v?: any) => (v ? parseFloat(v) : 0)
+
 export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
@@ -71,12 +74,12 @@ export const handler = async (
 		E.map(body => {
 			const b = body as any
 			return validate<Cell & Location>(inputSchema)({
-				cell: parseInt(b.cell, 10),
-				area: parseInt(b.area, 10),
-				mccmnc: parseInt(b.mccmnc, 10),
-				lat: parseFloat(b.lat),
-				lng: parseFloat(b.lng),
-				accuracy: parseInt(b.accuracy, 10),
+				cell: toIntOr0(b.cell),
+				area: toIntOr0(b.area),
+				mccmnc: toIntOr0(b.mccmnc),
+				lat: toFloatOr0(b.lat),
+				lng: toFloatOr0(b.lng),
+				accuracy: toIntOr0(b.accuracy),
 			})()
 		}),
 		E.flatten,
