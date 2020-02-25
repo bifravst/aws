@@ -20,6 +20,7 @@ export const addCellToCacheIfNotExists = ({
 	cell,
 	lat,
 	lng,
+	accuracy,
 }: Cell & Location): TE.TaskEither<ErrorInfo, void> =>
 	pipe(
 		TE.tryCatch<ErrorInfo, void>(
@@ -35,6 +36,9 @@ export const addCellToCacheIfNotExists = ({
 						},
 						lng: {
 							N: `${lng}`,
+						},
+						accuracy: {
+							N: `${Math.round(accuracy)}`,
 						},
 					},
 					ConditionExpression: 'attribute_not_exists(cellId)',

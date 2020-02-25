@@ -1,15 +1,16 @@
 Feature: Cell Geolocation Publish API
 
     Trusted clients can publish cell geolocation information,
-    so it becomes available for querying/
+    so it becomes available for querying.
+    # FIXME: Authenticate using API Key
 
     Background:
 
         Given the endpoint is "{geolocationApiUrl}"
-        # FIXME: Authenticate using API Key
         And I store "$floor($random() * 100000000)" into "cellId"
         And I store "$floor($random() * 10000) + 10000" into "mccmnc"
         And I store "$floor($random() * 100) + 100" into "area"
+        And I store "$floor($random() * 50000)" into "accuracy"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
 
@@ -22,7 +23,8 @@ Feature: Cell Geolocation Publish API
             "area": {area},
             "mccmnc": {mccmnc},
             "lat": {lat},
-            "lng": {lng}
+            "lng": {lng},
+            "accuracy": {accuracy}
             }
             """
         Then the response status code should be 202
@@ -37,6 +39,7 @@ Feature: Cell Geolocation Publish API
             """
             {
             "lng": {lng},
-            "lat": {lat}
+            "lat": {lat},
+            "accuracy": {accuracy}
             }
             """

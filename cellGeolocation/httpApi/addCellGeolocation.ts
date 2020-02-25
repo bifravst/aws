@@ -49,8 +49,13 @@ const inputSchema = new Ajv().compile({
 			min: -180,
 			max: 180,
 		},
+		accuracy: {
+			type: 'number',
+			min: 0,
+			max: 50000,
+		},
 	},
-	required: ['cell', 'area', 'mccmnc', 'lat', 'lng'],
+	required: ['cell', 'area', 'mccmnc', 'lat', 'lng', 'accuracy'],
 	additionalProperties: false,
 })
 
@@ -71,6 +76,7 @@ export const handler = async (
 				mccmnc: parseInt(b.mccmnc, 10),
 				lat: parseFloat(b.lat),
 				lng: parseFloat(b.lng),
+				accuracy: parseInt(b.accuracy, 10),
 			})()
 		}),
 		E.flatten,
