@@ -6,6 +6,7 @@ import { cellId } from '@bifravst/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from './ErrorInfo'
 import { Location, Cell } from './geolocateCell'
+import { pipe } from 'fp-ts/lib/pipeable'
 
 export const addCellToCacheIfNotExists = ({
 	dynamodb,
@@ -13,7 +14,14 @@ export const addCellToCacheIfNotExists = ({
 }: {
 	dynamodb: DynamoDBClient
 	TableName: string
-}) => ({ area, mccmnc, cell, lat, lng, }: Cell & Location) =>
+}) => ({
+	area,
+	mccmnc,
+	cell,
+	lat,
+	lng,
+}: Cell & Location): TE.TaskEither<ErrorInfo, void> =>
+	pipe(
 		TE.tryCatch<ErrorInfo, void>(
 			async () => {
 				const query = {
@@ -31,16 +39,29 @@ export const addCellToCacheIfNotExists = ({
 					},
 					ConditionExpression: 'attribute_not_exists(cellId)',
 				}
-				const res = await dynamodb.send(
-					new PutItemCommand(query),
-				)
+				const res = await dynamodb.send(new PutItemCommand(query))
 				console.log(JSON.stringify({ query, res }))
 			},
 			err => {
-				console.error(JSON.stringify({ error: err }))
+				if ((err as Error).name === 'ConditionalCheckFailedException') {
+					return {
+						type: ErrorType.Conflict,
+						message: (err as Error).message,
+					}
+				}
+				console.error(
+					JSON.stringify({
+						addCellToCacheIfNotExists: { error: err, TableName },
+					}),
+				)
 				return {
 					type: ErrorType.InternalError,
 					message: (err as Error).message,
 				}
 			},
-		)
+		),
+		TE.fold(
+			e => (e.type === ErrorType.Conflict ? TE.right(undefined) : TE.left(e)),
+			() => TE.right(undefined),
+		),
+	)

@@ -1,4 +1,3 @@
-@Only
 Feature: Cell Geolocation Publish API
 
     Trusted clients can publish cell geolocation information,
