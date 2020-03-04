@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: "12.x"
       - name: Cache AWS CLI (Linux)
-        if: ${{ runner.OS }} === 'Linux'
+        if: ${{ runner.OS }} == 'Linux'
         id: cache-aws-cli-linux
         uses: actions/cache@v1
         with:
@@ -32,14 +32,14 @@ jobs:
           key: ${{ runner.OS }}-cache-aws-cli
       - name: Install AWS (Linux)
         if:
-          ${{ runner.OS }} === 'Linux' &&
+          ${{ runner.OS }} == 'Linux' &&
           steps.cache-aws-cli-linux.outputs.cache-hit != 'true'
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
           sudo ./aws/install
       - name: Cache AWS CLI (MacOS)
-        if: ${{ runner.OS }} === 'macOS'
+        if: ${{ runner.OS }} == 'macOS'
         id: cache-aws-cli-macos
         uses: actions/cache@v1
         with:
@@ -47,7 +47,7 @@ jobs:
           key: ${{ runner.OS }}-cache-aws-cli
       - name: Install AWS (MacOS)
         if:
-          ${{ runner.OS }} === 'macOS' &&
+          ${{ runner.OS }} == 'macOS' &&
           steps.cache-aws-cli-macos.outputs.cache-hit != 'true'
         run: |
           curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
