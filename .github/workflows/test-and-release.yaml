@@ -23,6 +23,35 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
+      - name: Cache AWS CLI (Linux)
+        if: ${{ runner.OS }} === 'Linux'
+        id: cache-aws-cli
+        uses: actions/cache@v1
+        with:
+          path: aws/
+          key: ${{ runner.OS }}-cache-aws-cli
+      - name: Install AWS (Linux)
+        if:
+          ${{ runner.OS }} === 'Linux' && steps.cache-aws-cli.outputs.cache-hit
+          != 'true'
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+      - name: Cache AWS CLI (MacOS)
+        if: ${{ runner.OS }} === 'macOS'
+        id: cache-aws-cli
+        uses: actions/cache@v1
+        with:
+          path: AWSCLIV2.pkg
+          key: ${{ runner.OS }}-cache-aws-cli
+      - name: Install AWS (MacOS)
+        if:
+          ${{ runner.OS }} === 'macOS' && steps.cache-aws-cli.outputs.cache-hit
+          != 'true'
+        run: |
+          curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+          sudo installer -pkg AWSCLIV2.pkg -target /
       - name: Authenticate with NPM
         run: |
           echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
