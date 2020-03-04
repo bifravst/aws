@@ -104,9 +104,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
-      - name: Semantic release
-        if: success()
-        continue-on-error: true
+      - name: Authenticate with NPM
         run: |
-          npm i --no-save semantic-release@next
+          echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
+      - name: Semantic release
+        run: |
+          npm i --no-save semantic-release
           npx semantic-release

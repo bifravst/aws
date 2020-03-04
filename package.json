@@ -112,7 +112,7 @@
     ]
   },
   "deploy": {
-    "branch": "saga",
+    "branches": ["saga"],
     "webApp": {
       "repository": "https://github.com/bifravst/app.git",
       "branch": "saga"
