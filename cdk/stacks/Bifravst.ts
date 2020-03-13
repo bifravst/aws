@@ -421,6 +421,22 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:cellGeoLocationsCacheTable`,
 		})
 
+		new CloudFormation.CfnOutput(this, 'cellGeolocationStateMachineArn', {
+			value: cellgeo.stateMachine.stateMachineArn,
+			exportName: `${this.stackName}:cellGeolocationStateMachineArn`,
+		})
+
+		new CloudFormation.CfnOutput(
+			this,
+			'cellGeolocationStateMachineLogGroupArn',
+			{
+				value: `arn:aws:logs:${this.region}:${this.account}:log-group:${cellgeo.stateMachineLogGroup.logGroupName}`,
+				exportName: `${this.stackName}:cellGeolocationStateMachineLogGroupArn`,
+			},
+		)
+
+		cellgeo.stateMachine.grantStartExecution(userRole)
+
 		userRole.addToPolicy(
 			new IAM.PolicyStatement({
 				actions: ['dynamodb:GetItem'],

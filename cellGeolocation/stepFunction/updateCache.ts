@@ -3,30 +3,24 @@ import {
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { StateDocument } from './types'
-import { Location } from '../geolocateCell'
+import { CellGeoLocation } from './types'
 
 const TableName = process.env.CACHE_TABLE || ''
 const dynamodb = new DynamoDBClient({})
 
-export const handler = async (
-	event: StateDocument & { cellgeo: Location },
-): Promise<boolean> => {
+export const handler = async (cell: CellGeoLocation): Promise<boolean> => {
 	console.log(
 		JSON.stringify({
-			event,
+			cell,
 		}),
 	)
-	const {
-		roaming,
-		cellgeo: { lat, lng, accuracy },
-	} = event
+	const { lat, lng, accuracy } = cell
 	await dynamodb.send(
 		new PutItemCommand({
 			TableName,
 			Item: {
 				cellId: {
-					S: cellId(roaming),
+					S: cellId(cell),
 				},
 				lat: {
 					N: `${lat}`,

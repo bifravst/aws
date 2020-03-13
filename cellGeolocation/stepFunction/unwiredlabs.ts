@@ -1,7 +1,8 @@
 import { SSM } from 'aws-sdk'
 import { request as nodeRequest } from 'https'
 import { parse } from 'url'
-import { StateDocument, CellGeo } from './types'
+import { CellGeoLocation } from './types'
+import { Cell } from '../geolocateCell'
 
 export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
 	api,
@@ -31,7 +32,7 @@ export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
 
 const fetchSettings = getApiSettings({ ssm: new SSM() })
 
-export const handler = async (state: StateDocument): Promise<CellGeo> => {
+export const handler = async (cell: Cell): Promise<CellGeoLocation> => {
 	try {
 		const { apiKey, endpoint } = await fetchSettings({
 			api: 'unwiredlabs',
@@ -105,12 +106,12 @@ export const handler = async (state: StateDocument): Promise<CellGeo> => {
 			const payload = JSON.stringify({
 				token: apiKey,
 				radio: 'lte',
-				mcc: Math.floor(state.roaming.mccmnc / 100),
-				mnc: state.roaming.mccmnc % 100,
+				mcc: Math.floor(cell.mccmnc / 100),
+				mnc: cell.mccmnc % 100,
 				cells: [
 					{
-						lac: state.roaming.area,
-						cid: state.roaming.cell,
+						lac: cell.area,
+						cid: cell.cell,
 					},
 				],
 			})
@@ -121,18 +122,17 @@ export const handler = async (state: StateDocument): Promise<CellGeo> => {
 
 		if (status === 'ok' && lat && lon) {
 			return {
+				...cell,
 				lat,
 				lng: lon,
 				located: true,
 			}
 		}
-		return {
-			located: false,
-		}
 	} catch (err) {
 		console.error(JSON.stringify({ error: err }))
-		return {
-			located: false,
-		}
+	}
+	return {
+		...cell,
+		located: false,
 	}
 }
