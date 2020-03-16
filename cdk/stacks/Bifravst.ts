@@ -430,7 +430,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			this,
 			'cellGeolocationStateMachineLogGroupArn',
 			{
-				value: `arn:aws:logs:${this.region}:${this.account}:log-group:${cellgeo.stateMachineLogGroup.logGroupName}`,
+				value: cellgeo.stateMachineLogGroup.logGroupArn,
 				exportName: `${this.stackName}:cellGeolocationStateMachineLogGroupArn`,
 			},
 		)

@@ -1,5 +1,5 @@
-import { Location, Cell } from '../geolocateCell'
+import { Location } from '../geolocateCell'
 
-export type CellGeoLocation = Cell & {
+export type MaybeCellGeoLocation = {
 	located: boolean
 } & Partial<Location>

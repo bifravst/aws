@@ -342,28 +342,18 @@ export class CellGeolocation extends CloudFormation.Resource {
 			new IAM.PolicyStatement({
 				actions: [
 					'logs:CreateLogDelivery',
-					'logs:DeleteLogDelivery',
-					'logs:DescribeResourcePolicies',
-					'logs:DescribeLogGroups',
 					'logs:GetLogDelivery',
+					'logs:UpdateLogDelivery',
+					'logs:DeleteLogDelivery',
 					'logs:ListLogDeliveries',
 					'logs:PutResourcePolicy',
-					'logs:UpdateLogDelivery',
-				],
-				resources: [
-					`arn:aws:states:${parent.region}:${parent.account}:stateMachine:${this.stack.stackName}-cellGeo`,
-					`arn:aws:states:${parent.region}:${parent.account}:stateMachine:${this.stack.stackName}-cellGeo/*`,
-				],
-			}),
-		)
-		stateMachineRole.addToPolicy(
-			new IAM.PolicyStatement({
-				actions: [
+					'logs:DescribeResourcePolicies',
 					'logs:CreateLogGroup',
+					'logs:DescribeLogGroups',
 					'logs:CreateLogStream',
 					'logs:PutLogEvents',
 				],
-				resources: [this.stateMachineLogGroup.logGroupArn],
+				resources: ['*'],
 			}),
 		)
 

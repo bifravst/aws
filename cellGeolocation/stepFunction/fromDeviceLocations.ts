@@ -1,6 +1,6 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { CellGeoLocation } from './types'
+import { MaybeCellGeoLocation } from './types'
 import { isSome } from 'fp-ts/lib/Option'
 import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
 import { Cell } from '../geolocateCell'
@@ -9,7 +9,7 @@ const TableName = process.env.LOCATIONS_TABLE || ''
 const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''
 const dynamodb = new DynamoDBClient({})
 
-export const handler = async (cell: Cell): Promise<CellGeoLocation> => {
+export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	const { Items } = await dynamodb.send(
 		new QueryCommand({
 			TableName,
@@ -41,14 +41,12 @@ export const handler = async (cell: Cell): Promise<CellGeoLocation> => {
 			)
 
 			return {
-				...cell,
 				located: true,
 				...location.value,
 			}
 		}
 	}
 	return {
-		...cell,
 		located: false,
 	}
 }

@@ -1,7 +1,7 @@
 import { SSM } from 'aws-sdk'
 import { request as nodeRequest } from 'https'
 import { parse } from 'url'
-import { CellGeoLocation } from './types'
+import { MaybeCellGeoLocation } from './types'
 import { Cell } from '../geolocateCell'
 
 export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
@@ -32,7 +32,7 @@ export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
 
 const fetchSettings = getApiSettings({ ssm: new SSM() })
 
-export const handler = async (cell: Cell): Promise<CellGeoLocation> => {
+export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	try {
 		const { apiKey, endpoint } = await fetchSettings({
 			api: 'unwiredlabs',
@@ -122,7 +122,6 @@ export const handler = async (cell: Cell): Promise<CellGeoLocation> => {
 
 		if (status === 'ok' && lat && lon) {
 			return {
-				...cell,
 				lat,
 				lng: lon,
 				located: true,
@@ -132,7 +131,6 @@ export const handler = async (cell: Cell): Promise<CellGeoLocation> => {
 		console.error(JSON.stringify({ error: err }))
 	}
 	return {
-		...cell,
 		located: false,
 	}
 }
