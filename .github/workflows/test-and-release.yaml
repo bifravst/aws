@@ -78,11 +78,6 @@ jobs:
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup -d
           node cli create-ca
-          CELLGEO_STEPFUN_ARN=`aws cloudformation describe-stacks --stack-name $STACK_ID | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "cellGeolocationStateMachineArn") | .OutputValue'`
-          CELLGEO_STEPFUN_LOGGROUP_ARN=`aws cloudformation describe-stacks --stack-name $STACK_ID | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "cellGeolocationStateMachineLogGroupArn") | .OutputValue'`
-          echo CELLGEO_STEPFUN_ARN=$CELLGEO_STEPFUN_ARN
-          echo CELLGEO_STEPFUN_LOGGROUP_ARN=$CELLGEO_STEPFUN_LOGGROUP_ARN
-          aws stepfunctions update-state-machine --state-machine-arn $CELLGEO_STEPFUN_ARN --logging-configuration "{\"level\": \"ALL\", \"includeExecutionData\": true, \"destinations\": [{\"cloudWatchLogsLogGroup\": {\"logGroupArn\": \"$CELLGEO_STEPFUN_LOGGROUP_ARN\"}}]}"
       - name: End-to-End Tests
         run: |
           npm run test:e2e

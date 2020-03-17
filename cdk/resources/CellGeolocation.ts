@@ -4,7 +4,6 @@ import * as IoT from '@aws-cdk/aws-iot'
 import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
 import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
-import * as Logs from '@aws-cdk/aws-logs'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import * as S3 from '@aws-cdk/aws-s3'
 import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
@@ -21,7 +20,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.Table
 	public readonly deviceCellGeolocationTable: DynamoDB.Table
 	public readonly stateMachine: StepFunctions.IStateMachine
-	public readonly stateMachineLogGroup: Logs.ILogGroup
+	public readonly stateMachineName: string
 
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -229,10 +228,14 @@ export class CellGeolocation extends CloudFormation.Resource {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
 		})
 
-		// FIXME: Enable logging via CDK
+		/**
+		 * This is a STANDARD StepFunction because we want the user to be able to execute it and query it for the result.
+		 * This is not possible with EXPRESS StepFunctions.
+		 */
+		this.stateMachineName = `${this.stack.stackName}-cellGeo`
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
-			stateMachineName: `${this.stack.stackName}-cellGeo`,
-			stateMachineType: StateMachineType.EXPRESS,
+			stateMachineName: this.stateMachineName,
+			stateMachineType: StateMachineType.STANDARD,
 			definition: new StepFunctions.Task(this, 'Resolve from cache', {
 				task: new StepFunctionTasks.InvokeFunction(geolocateCellFromCache),
 				resultPath: '$.cellgeo',
@@ -332,30 +335,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			timeout: CloudFormation.Duration.minutes(5),
 			role: stateMachineRole,
 		})
-
-		this.stateMachineLogGroup = new Logs.LogGroup(this, 'LogGroup', {
-			logGroupName: `/aws/states/${this.stack.stackName}-cellGeo`,
-			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
-			retention: Logs.RetentionDays.ONE_WEEK,
-		})
-		stateMachineRole.addToPolicy(
-			new IAM.PolicyStatement({
-				actions: [
-					'logs:CreateLogDelivery',
-					'logs:GetLogDelivery',
-					'logs:UpdateLogDelivery',
-					'logs:DeleteLogDelivery',
-					'logs:ListLogDeliveries',
-					'logs:PutResourcePolicy',
-					'logs:DescribeResourcePolicies',
-					'logs:CreateLogGroup',
-					'logs:DescribeLogGroups',
-					'logs:CreateLogStream',
-					'logs:PutLogEvents',
-				],
-				resources: ['*'],
-			}),
-		)
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
 			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),
