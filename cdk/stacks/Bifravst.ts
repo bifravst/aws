@@ -69,10 +69,10 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
 			userPool: userPool,
-			enabledAuthFlows: [
-				Cognito.AuthFlow.USER_PASSWORD,
-				Cognito.AuthFlow.ADMIN_NO_SRP,
-			],
+			authFlows: {
+				userPassword: true,
+				adminUserPassword: true,
+			},
 		})
 		const developerProviderName = 'developerAuthenticated'
 
