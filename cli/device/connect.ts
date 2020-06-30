@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs'
-import { thingShadow } from 'aws-iot-device-sdk'
+import { mqtt, io, iot } from 'aws-crt'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import * as chalk from 'chalk'
 import { uiServer, WebSocketConnection } from '@bifravst/device-ui-server'
@@ -13,6 +13,8 @@ const defaultConfig = {
 	celt: 600, // cellular timeout (in seconds): timeout for acquiring cellular connection
 	acct: 1, // Accelerometer threshold: minimal absolute value for and accelerometer reading to be considered movement.
 } as const
+
+io.enable_logging(io.LogLevel.DEBUG)
 
 /**
  * Connect to the AWS IoT broker using a generated device certificate
@@ -96,14 +98,21 @@ export const connect = async ({
 		console.timeLog(note)
 	}, 5000)
 
-	const connection = new thingShadow({
-		privateKey: deviceFiles.key,
-		clientCert: deviceFiles.certWithCA,
-		caCert,
-		clientId: deviceId,
-		host: endpoint,
-		region: endpoint.split('.')[2],
-	})
+	const config_builder = iot.AwsIotMqttConnectionConfigBuilder.new_mtls_builder_from_path(
+		deviceFiles.certWithCA,
+		deviceFiles.key,
+	)
+		.with_certificate_authority_from_path(undefined, caCert)
+		.with_clean_session(true)
+		.with_client_id(deviceId)
+		.with_endpoint(endpoint)
+
+	const config = config_builder.build()
+	const client = new mqtt.MqttClient(new io.ClientBootstrap())
+	const connection = client.new_connection(config)
+	await connection.connect()
+
+	// FIXME: Implement shadow, see https://github.com/aws/aws-iot-device-sdk-python-v2/blob/master/samples/shadow.py
 
 	let wsConnection: WebSocketConnection
 
