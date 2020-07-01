@@ -6,8 +6,6 @@ import * as chalk from 'chalk'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 import { WebSocketConnection, uiServer } from '@bifravst/device-ui-server'
 
-io.enable_logging(io.LogLevel.ERROR)
-
 const defaultConfig = {
 	act: false, // Whether to enable the active mode
 	actwt: 60, //In active mode: wait this amount of seconds until sending the next update. The actual interval will be this time plus the time it takes to get a GPS fix.
@@ -45,6 +43,7 @@ export const connect = async ({
 	caCert: string
 	version: string
 }): Promise<void> => {
+	io.enable_logging(io.LogLevel.ERROR)
 	// Certificate check
 	const deviceFiles = deviceFileLocations({ certsDir, deviceId })
 	console.log(chalk.blue('Device ID:   '), chalk.yellow(deviceId))
@@ -73,14 +72,6 @@ export const connect = async ({
 		process.exit(1)
 	}
 
-	const note = chalk.magenta(
-		`Still connecting ... First connect takes around 30 seconds`,
-	)
-	console.time(note)
-	const connectingNote = setInterval(() => {
-		console.timeLog(note)
-	}, 5000)
-
 	const config_builder = iot.AwsIotMqttConnectionConfigBuilder.new_mtls_builder_from_path(
 		deviceFiles.certWithCA,
 		deviceFiles.key,
@@ -105,9 +96,22 @@ export const connect = async ({
 	setInterval(() => {
 		// NOTE! This is needed so the underlying AWS MQTT library does not crash
 	}, 60000)
-	await connection.connect()
+
+	const note = chalk.magenta(
+		`Still connecting ... First connect takes around 30 seconds`,
+	)
+	console.time(note)
+	let connected = false
+	while (!connected) {
+		try {
+			await connection.connect()
+			connected = true
+		} catch {
+			await new Promise((resolve) => setTimeout(resolve, 5000))
+			console.timeLog(note)
+		}
+	}
 	connectingTimer()
-	clearInterval(connectingNote)
 
 	// UI Server
 	let wsConnection: WebSocketConnection
