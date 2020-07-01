@@ -1,10 +1,12 @@
 import { promises as fs } from 'fs'
 import { mqtt, io, iot } from 'aws-crt'
-import { iotshadow } from 'aws-iot-device-sdk-v2'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { iotshadow } from 'aws-iot-device-sdk-v2'
 import * as chalk from 'chalk'
-import { uiServer, WebSocketConnection } from '@bifravst/device-ui-server'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
+import { WebSocketConnection, uiServer } from '@bifravst/device-ui-server'
+
+io.enable_logging(io.LogLevel.ERROR)
 
 const defaultConfig = {
 	act: false, // Whether to enable the active mode
@@ -16,7 +18,14 @@ const defaultConfig = {
 	acct: 1, // Accelerometer threshold: minimal absolute value for and accelerometer reading to be considered movement.
 } as const
 
-io.enable_logging(io.LogLevel.DEBUG)
+const labeledTimer = (label: string): (() => void) => {
+	console.log(chalk.yellow.dim(`${label}...`))
+	const doneLabel = chalk.green(`${label} ✔ `)
+	console.time(doneLabel)
+	return () => {
+		console.timeEnd(doneLabel)
+	}
+}
 
 /**
  * Connect to the AWS IoT broker using a generated device certificate
@@ -36,41 +45,15 @@ export const connect = async ({
 	caCert: string
 	version: string
 }): Promise<void> => {
+	// Certificate check
 	const deviceFiles = deviceFileLocations({ certsDir, deviceId })
-	let cfg = defaultConfig
-	const devRoam = {
-		dev: {
-			v: {
-				band: 666,
-				nw: 'LAN',
-				modV: 'device-simulator',
-				brdV: 'device-simulator',
-				appV: version,
-				iccid: '12345678901234567890',
-			},
-			ts: Date.now(),
-		},
-		roam: {
-			v: {
-				rsrp: 70,
-				area: 30401,
-				mccmnc: 24201,
-				cell: 16964098,
-				ip: '0.0.0.0',
-			},
-			ts: Date.now(),
-		},
-	}
-
 	console.log(chalk.blue('Device ID:   '), chalk.yellow(deviceId))
 	console.log(chalk.blue('endpoint:    '), chalk.yellow(endpoint))
 	console.log(chalk.blue('deviceUiUrl: '), chalk.yellow(deviceUiUrl))
 	console.log(chalk.blue('CA cert:     '), chalk.yellow(caCert))
 	console.log(chalk.blue('Private key: '), chalk.yellow(deviceFiles.key))
 	console.log(chalk.blue('Certificate: '), chalk.yellow(deviceFiles.certWithCA))
-
 	const certFiles = [deviceFiles.certWithCA, deviceFiles.key, caCert]
-
 	try {
 		await Promise.all(
 			certFiles.map(async (f) => {
@@ -90,8 +73,6 @@ export const connect = async ({
 		process.exit(1)
 	}
 
-	console.time(chalk.green(chalk.inverse(' connected ')))
-
 	const note = chalk.magenta(
 		`Still connecting ... First connect takes around 30 seconds`,
 	)
@@ -104,59 +85,33 @@ export const connect = async ({
 		deviceFiles.certWithCA,
 		deviceFiles.key,
 	)
-		.with_certificate_authority_from_path(undefined, caCert)
-		.with_clean_session(true)
-		.with_client_id(deviceId)
-		.with_endpoint(endpoint)
+	config_builder.with_certificate_authority_from_path(undefined, caCert)
+	config_builder.with_clean_session(true)
+	config_builder.with_client_id(deviceId)
+	config_builder.with_endpoint(endpoint)
 
 	const config = config_builder.build()
 	const client = new mqtt.MqttClient(new io.ClientBootstrap())
 	const connection = client.new_connection(config)
-	await connection.connect()
+	const shadow = new iotshadow.IotShadowClient(connection)
+	connection.on('disconnect', () => {
+		console.error(chalk.red(' disconnected! '))
+	})
+	connection.on('resume', () => {
+		console.log(chalk.magenta('reconnecting...'))
+	})
 
-	console.timeEnd(chalk.green(chalk.inverse(' connected ')))
+	const connectingTimer = labeledTimer('connecting')
+	setInterval(() => {
+		// NOTE! This is needed so the underlying AWS MQTT library does not crash
+	}, 60000)
+	await connection.connect()
+	connectingTimer()
 	clearInterval(connectingNote)
 
+	// UI Server
 	let wsConnection: WebSocketConnection
-
-	const shadow = new iotshadow.IotShadowClient(connection)
-
-	await shadow.subscribeToShadowDeltaUpdatedEvents(
-		{
-			thingName: deviceId,
-		},
-		mqtt.QoS.AtLeastOnce,
-		async (error, stateObject) => {
-			if (isNotNullOrUndefined(error)) {
-				console.error(
-					chalk.red(`Failed to subscribe to shadow delta for ${deviceId}`),
-					chalk.redBright(error?.message),
-				)
-				return
-			}
-			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(stateObject)))
-			cfg = {
-				...cfg,
-				...(stateObject?.state as Record<string, any> | undefined)?.cfg,
-			}
-			if (wsConnection !== undefined) {
-				console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
-				wsConnection.send(JSON.stringify(cfg))
-			}
-			console.log(
-				chalk.magenta('>'),
-				chalk.cyan(JSON.stringify({ state: { reported: { cfg } } })),
-			)
-			await shadow.publishUpdateShadow(
-				{
-					thingName: deviceId,
-					state: { reported: { cfg } },
-				},
-				mqtt.QoS.AtLeastOnce,
-			)
-		},
-	)
-
+	const startingUiServerTimer = labeledTimer('Starting UI server')
 	await uiServer({
 		deviceUiUrl,
 		deviceId: deviceId,
@@ -188,21 +143,47 @@ export const connect = async ({
 			)
 		},
 	})
+	startingUiServerTimer()
 
+	// Configuration management
+	let cfg = defaultConfig
+	const devRoam = {
+		dev: {
+			v: {
+				band: 666,
+				nw: 'LAN',
+				modV: 'device-simulator',
+				brdV: 'device-simulator',
+				appV: version,
+				iccid: '12345678901234567890',
+			},
+			ts: Date.now(),
+		},
+		roam: {
+			v: {
+				rsrp: 70,
+				area: 30401,
+				mccmnc: 24201,
+				cell: 16964098,
+				ip: '0.0.0.0',
+			},
+			ts: Date.now(),
+		},
+	}
+
+	const acceptedTimer = labeledTimer('Subscribing to shadow get accepted')
 	await shadow.subscribeToGetShadowAccepted(
 		{ thingName: deviceId },
 		mqtt.QoS.AtLeastOnce,
-		(error, shadow) => {
+		async (error, shadow) => {
 			if (isNotNullOrUndefined(error)) {
 				console.error(
-					chalk.red(
-						`Failed to subscribe to shadow get accepted for ${deviceId}`,
-					),
+					chalk.red(`Failed to receive shadow get accepted for ${deviceId}`),
 					chalk.redBright(error?.message),
 				)
 				return
 			}
-			console.log(chalk.magenta('>'), chalk.cyan(shadow))
+			console.log(chalk.magenta('>'), chalk.cyan(JSON.stringify(shadow)))
 			if (wsConnection !== undefined) {
 				cfg = {
 					...cfg,
@@ -213,8 +194,36 @@ export const connect = async ({
 			}
 		},
 	)
+	acceptedTimer()
 
-	// Send current config
+	const deltaTimer = labeledTimer('Subscribing to shadow delta')
+	await shadow.subscribeToShadowDeltaUpdatedEvents(
+		{
+			thingName: deviceId,
+		},
+		mqtt.QoS.AtLeastOnce,
+		(error, stateObject) => {
+			if (isNotNullOrUndefined(error)) {
+				console.error(
+					chalk.red(`Failed to receive shadow delta for ${deviceId}`),
+					chalk.redBright(error?.message),
+				)
+				return
+			}
+			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(stateObject)))
+			cfg = {
+				...cfg,
+				...(stateObject?.state as Record<string, any> | undefined)?.cfg,
+			}
+			if (wsConnection !== undefined) {
+				console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
+				wsConnection.send(JSON.stringify(cfg))
+			}
+		},
+	)
+	deltaTimer()
+
+	const currentConfigTimer = labeledTimer('Sending current config')
 	console.log(
 		chalk.magenta('>'),
 		chalk.cyan(JSON.stringify({ state: { reported: { cfg, ...devRoam } } })),
@@ -223,12 +232,13 @@ export const connect = async ({
 		{ thingName: deviceId, state: { reported: { cfg, ...devRoam } } },
 		mqtt.QoS.AtLeastOnce,
 	)
-
-	connection.on('disconnect', () => {
-		console.error(chalk.red(chalk.inverse(' disconnected! ')))
-	})
-
-	connection.on('resume', () => {
-		console.log(chalk.magenta('reconnecting...'))
-	})
+	currentConfigTimer()
+	const getShadowTimer = labeledTimer('Getting shadow')
+	await shadow.publishGetShadow(
+		{
+			thingName: deviceId,
+		},
+		mqtt.QoS.AtLeastOnce,
+	)
+	getShadowTimer()
 }
