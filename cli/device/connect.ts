@@ -1,8 +1,10 @@
 import { promises as fs } from 'fs'
 import { mqtt, io, iot } from 'aws-crt'
+import { iotshadow } from 'aws-iot-device-sdk-v2'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import * as chalk from 'chalk'
 import { uiServer, WebSocketConnection } from '@bifravst/device-ui-server'
+import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 
 const defaultConfig = {
 	act: false, // Whether to enable the active mode
@@ -112,69 +114,30 @@ export const connect = async ({
 	const connection = client.new_connection(config)
 	await connection.connect()
 
-	// FIXME: Implement shadow, see https://github.com/aws/aws-iot-device-sdk-python-v2/blob/master/samples/shadow.py
+	console.timeEnd(chalk.green(chalk.inverse(' connected ')))
+	clearInterval(connectingNote)
 
 	let wsConnection: WebSocketConnection
 
-	connection.on('connect', async () => {
-		console.timeEnd(chalk.green(chalk.inverse(' connected ')))
-		clearInterval(connectingNote)
+	const shadow = new iotshadow.IotShadowClient(connection)
 
-		connection.register(deviceId, {}, async () => {
-			await uiServer({
-				deviceUiUrl,
-				deviceId: deviceId,
-				onUpdate: (update) => {
-					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(update)))
-					connection.update(deviceId, { state: { reported: update } })
-				},
-				onMessage: (message) => {
-					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(message)))
-					connection.publish(`${deviceId}/messages`, JSON.stringify(message))
-				},
-				onWsConnection: (c) => {
-					console.log(chalk.magenta('[ws]'), chalk.cyan('connected'))
-					wsConnection = c
-					connection.get(deviceId)
-				},
-			})
-			console.log(
-				chalk.magenta('>'),
-				chalk.cyan(
-					JSON.stringify({ state: { reported: { cfg, ...devRoam } } }),
-				),
-			)
-			connection.update(deviceId, { state: { reported: { cfg, ...devRoam } } })
-		})
-
-		connection.on('close', () => {
-			console.error(chalk.red(chalk.inverse(' disconnected! ')))
-		})
-
-		connection.on('reconnect', () => {
-			console.log(chalk.magenta('reconnecting...'))
-		})
-
-		connection.on('status', (_, stat, __, stateObject) => {
-			console.log(chalk.magenta('>'), chalk.cyan(stat))
-			console.log(chalk.magenta('>'), chalk.cyan(JSON.stringify(stateObject)))
-			if (stat === 'accepted') {
-				if (wsConnection !== undefined) {
-					cfg = {
-						...cfg,
-						...stateObject.desired.cfg,
-					}
-					console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
-					wsConnection.send(JSON.stringify(cfg))
-				}
+	await shadow.subscribeToShadowDeltaUpdatedEvents(
+		{
+			thingName: deviceId,
+		},
+		mqtt.QoS.AtLeastOnce,
+		async (error, stateObject) => {
+			if (isNotNullOrUndefined(error)) {
+				console.error(
+					chalk.red(`Failed to subscribe to shadow delta for ${deviceId}`),
+					chalk.redBright(error?.message),
+				)
+				return
 			}
-		})
-
-		connection.on('delta', (_, stateObject) => {
 			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(stateObject)))
 			cfg = {
 				...cfg,
-				...stateObject.state.cfg,
+				...(stateObject?.state as Record<string, any> | undefined)?.cfg,
 			}
 			if (wsConnection !== undefined) {
 				console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
@@ -184,13 +147,88 @@ export const connect = async ({
 				chalk.magenta('>'),
 				chalk.cyan(JSON.stringify({ state: { reported: { cfg } } })),
 			)
-			connection.update(deviceId, { state: { reported: { cfg } } })
-		})
-
-		connection.on('timeout', (thingName, clientToken) => {
-			console.log(
-				'received timeout on ' + thingName + ' with token: ' + clientToken,
+			await shadow.publishUpdateShadow(
+				{
+					thingName: deviceId,
+					state: { reported: { cfg } },
+				},
+				mqtt.QoS.AtLeastOnce,
 			)
-		})
+		},
+	)
+
+	await uiServer({
+		deviceUiUrl,
+		deviceId: deviceId,
+		onUpdate: async (update) => {
+			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(update)))
+			await shadow.publishUpdateShadow(
+				{
+					thingName: deviceId,
+					state: { reported: update },
+				},
+				mqtt.QoS.AtLeastOnce,
+			)
+		},
+		onMessage: async (message) => {
+			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(message)))
+			await connection.publish(
+				`${deviceId}/messages`,
+				message,
+				mqtt.QoS.AtLeastOnce,
+			)
+		},
+		onWsConnection: async (c) => {
+			console.log(chalk.magenta('[ws]'), chalk.cyan('connected'))
+			wsConnection = c
+			// Fetch current config
+			await shadow.publishGetShadow(
+				{ thingName: deviceId },
+				mqtt.QoS.AtLeastOnce,
+			)
+		},
+	})
+
+	await shadow.subscribeToGetShadowAccepted(
+		{ thingName: deviceId },
+		mqtt.QoS.AtLeastOnce,
+		(error, shadow) => {
+			if (isNotNullOrUndefined(error)) {
+				console.error(
+					chalk.red(
+						`Failed to subscribe to shadow get accepted for ${deviceId}`,
+					),
+					chalk.redBright(error?.message),
+				)
+				return
+			}
+			console.log(chalk.magenta('>'), chalk.cyan(shadow))
+			if (wsConnection !== undefined) {
+				cfg = {
+					...cfg,
+					...(shadow?.state?.desired as Record<string, any> | undefined)?.cfg,
+				}
+				console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
+				wsConnection.send(JSON.stringify(cfg))
+			}
+		},
+	)
+
+	// Send current config
+	console.log(
+		chalk.magenta('>'),
+		chalk.cyan(JSON.stringify({ state: { reported: { cfg, ...devRoam } } })),
+	)
+	await shadow.publishUpdateShadow(
+		{ thingName: deviceId, state: { reported: { cfg, ...devRoam } } },
+		mqtt.QoS.AtLeastOnce,
+	)
+
+	connection.on('disconnect', () => {
+		console.error(chalk.red(chalk.inverse(' disconnected! ')))
+	})
+
+	connection.on('resume', () => {
+		console.log(chalk.magenta('reconnecting...'))
 	})
 }
