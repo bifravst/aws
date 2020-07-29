@@ -37,7 +37,7 @@
     "chalk": "^4.1.0",
     "commander": "^5.1.0",
     "date-fns": "^2.14.0",
-    "fp-ts": "^2.6.7",
+    "fp-ts": "^2.7.0",
     "uuid": "^8.2.0"
   },
   "devDependencies": {
