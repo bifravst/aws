@@ -38,7 +38,7 @@
     "commander": "6.1.0",
     "date-fns": "2.16.1",
     "fp-ts": "2.8.3",
-    "uuid": "8.3.0"
+    "uuid": "8.3.1"
   },
   "devDependencies": {
     "@aws-cdk/aws-apigatewayv2": "1.64.1",
