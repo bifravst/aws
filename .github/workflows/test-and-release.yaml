@@ -81,7 +81,9 @@ jobs:
           npm run test:e2e
       - name: Get logs
         if: failure()
-        run: node cli logs
+        run: |
+          node cli logs
+          cat /Users/runner/.npm/_logs/*-debug.log
       - name: Clean up End-to-End test resources
         if: always()
         run: |
