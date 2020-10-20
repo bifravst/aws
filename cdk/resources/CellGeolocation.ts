@@ -77,7 +77,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'geolocateCellFromCache', geolocateCellFromCache)
+		lambdaLogGroup(
+			this,
+			'geolocateCellFromCache',
+			geolocateCellFromCache,
+			// FIXME: use DESTROY when #455 is closed
+			CloudFormation.RemovalPolicy.RETAIN,
+		)
 
 		this.deviceCellGeolocationTable = new DynamoDB.Table(
 			this,
@@ -144,7 +150,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'geolocateCellFromDevices', geolocateCellFromDevices)
+		lambdaLogGroup(
+			this,
+			'geolocateCellFromDevices',
+			geolocateCellFromDevices,
+			// FIXME: use DESTROY when #455 is closed
+			CloudFormation.RemovalPolicy.RETAIN,
+		)
 
 		const cacheCellGeolocation = new Lambda.Function(
 			this,
@@ -170,7 +182,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'cacheCellGeolocation', cacheCellGeolocation)
+		lambdaLogGroup(
+			this,
+			'cacheCellGeolocation',
+			cacheCellGeolocation,
+			// FIXME: use DESTROY when #455 is closed
+			CloudFormation.RemovalPolicy.RETAIN,
+		)
 
 		// Optional step
 		let geolocateCellFromUnwiredLabs: Lambda.IFunction | undefined = undefined
@@ -202,6 +220,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 				this,
 				'geolocateCellFromUnwiredLabs',
 				geolocateCellFromUnwiredLabs,
+				// FIXME: use DESTROY when #455 is closed
+				CloudFormation.RemovalPolicy.RETAIN,
 			)
 		}
 
@@ -450,7 +470,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'invokeStepFunctionFromSQS', invokeStepFunctionFromSQS)
+		lambdaLogGroup(
+			this,
+			'invokeStepFunctionFromSQS',
+			invokeStepFunctionFromSQS,
+			// FIXME: use DESTROY when #455 is closed
+			CloudFormation.RemovalPolicy.RETAIN,
+		)
 
 		invokeStepFunctionFromSQS.addPermission('invokeBySQS', {
 			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
