@@ -83,7 +83,7 @@ jobs:
         if: failure()
         run: |
           node cli logs
-          cat /Users/runner/.npm/_logs/*-debug.log
+          cat /Users/runner/.npm/_logs/*-debug.log 2> /dev/null
       - name: Clean up End-to-End test resources
         if: always()
         run: |
