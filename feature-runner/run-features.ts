@@ -6,6 +6,7 @@ import {
 	storageStepRunners,
 	restStepRunners,
 	randomStepRunners,
+	RestClient,
 } from '@bifravst/e2e-bdd-test-runner'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as program from 'commander'
@@ -170,7 +171,13 @@ program
 							},
 						}),
 					)
-					.addStepRunners(restStepRunners())
+					.addStepRunners(
+						restStepRunners({
+							client: new RestClient({
+								debug: (...args: any) => console.log('[REST]', ...args),
+							}),
+						}),
+					)
 					.run()
 				if (!success) {
 					process.exit(1)
