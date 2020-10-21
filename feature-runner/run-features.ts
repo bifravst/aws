@@ -173,14 +173,6 @@ program
 					.addStepRunners(
 						restStepRunners({
 							client: new RestClient({
-								debugLog: (requestId: string, ...rest: any) =>
-									console.debug(
-										chalk.cyan('[RestClient]'),
-										chalk.yellow(requestId),
-										...rest.map((arg: any) =>
-											chalk.gray(JSON.stringify(arg, null, 2)),
-										),
-									),
 								errorLog: (requestId: string, ...rest: any) =>
 									console.error(
 										chalk.redBright('[RestClient]'),

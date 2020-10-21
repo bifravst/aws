@@ -92,8 +92,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			this,
 			`HttpApiLogGroup`,
 			{
-				// FIXME: use DESTROY when #455 is closed
-				removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+				removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 				logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
 				retention: CloudWatchLogs.RetentionDays.ONE_WEEK,
 			},
