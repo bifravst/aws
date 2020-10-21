@@ -174,7 +174,8 @@ program
 					.addStepRunners(
 						restStepRunners({
 							client: new RestClient({
-								debug: console.debug,
+								debugLog: (...args: any) => console.debug('[REST]', ...args),
+								errorLog: (...args: any) => console.error('[REST]', ...args),
 							}),
 						}),
 					)
