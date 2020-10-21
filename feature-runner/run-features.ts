@@ -125,7 +125,6 @@ program
 					new ConsoleReporter({
 						printResults,
 						printProgress: progress,
-						printProgressTimestamps: true,
 						printSummary: true,
 					}),
 				],
@@ -176,7 +175,7 @@ program
 							client: new RestClient({
 								debugLog: (requestId: string, ...rest: any) =>
 									console.debug(
-										chalk.cyan('[REST]'),
+										chalk.cyan('[RestClient]'),
 										chalk.yellow(requestId),
 										...rest.map((arg: any) =>
 											chalk.gray(JSON.stringify(arg, null, 2)),
@@ -184,7 +183,7 @@ program
 									),
 								errorLog: (requestId: string, ...rest: any) =>
 									console.error(
-										chalk.redBright('[REST]'),
+										chalk.redBright('[RestClient]'),
 										chalk.yellow(requestId),
 										...rest.map((arg: any) =>
 											chalk.red(JSON.stringify(arg, null, 2)),
