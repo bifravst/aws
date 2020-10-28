@@ -39,7 +39,7 @@
     "check-node-version": "4.0.3",
     "commander": "6.2.0",
     "date-fns": "2.16.1",
-    "fp-ts": "2.8.4",
+    "fp-ts": "2.8.5",
     "uuid": "8.3.1"
   },
   "devDependencies": {
