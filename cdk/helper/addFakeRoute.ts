@@ -16,12 +16,14 @@ const main = async () => {
 		new CloudFormation({ region }),
 	)<StackOutputs>(CORE_STACK_NAME)
 
-	await new ApiGatewayV2({ region })
+	const r = await new ApiGatewayV2({ region })
 		.createRoute({
 			ApiId: geolocationApiId,
 			RouteKey: `GET /__fake_${v4()}`,
 		})
 		.promise()
+
+	console.log(r)
 }
 
 void main()
