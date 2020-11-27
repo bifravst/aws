@@ -390,14 +390,9 @@ export class BifravstStack extends CloudFormation.Stack {
 			userRole,
 		})
 
-		new CloudFormation.CfnOutput(this, 'historicalMessagesTableName', {
-			value: hd.messagesTable.ref,
-			exportName: `${this.stackName}:historicalMessagesTableName`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'historicalUpdatesTableName', {
+		new CloudFormation.CfnOutput(this, 'historicaldataTableInfo', {
 			value: hd.updatesTable.ref,
-			exportName: `${this.stackName}:historicalUpdatesTableName`,
+			exportName: `${this.stackName}:historicaldataTableInfo`,
 		})
 
 		// FOTA
@@ -482,8 +477,7 @@ export type StackOutputs = {
 	userIotPolicyArn: string
 	avatarBucketName: string
 	fotaBucketName: string
-	historicalMessagesTableName: string
-	historicalUpdatesTableName: string
+	historicaldataTableInfo: string
 	geolocationApiUrl: string
 	geolocationApiId: string
 }

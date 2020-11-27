@@ -1,51 +1,89 @@
 import { TimestreamWrite } from 'aws-sdk'
 import { fromEnv } from '../util/fromEnv'
-import { toTimestreamRecords } from './toTimestreamRecords'
+import { batchToTimestreamRecords } from './batchToTimestreamRecords'
+import { messageToTimestreamRecords } from './messageToTimestreamRecords'
+import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
 
-const { messagesTableInfo, updatesTableInfo } = fromEnv({
-	messagesTableInfo: 'MESSAGES_TABLE_NAME',
-	updatesTableInfo: 'UPDATES_TABLE_NAME',
+const { tableInfo } = fromEnv({
+	tableInfo: 'TABLE_INFO',
 })(process.env)
 
-const [messagesDb, messagesTable] = messagesTableInfo.split('|')
-const [updatesDb, updatesTable] = updatesTableInfo.split('|')
+const [dbName, tableName] = tableInfo.split('|')
 
 console.log(
 	JSON.stringify({
-		messagesTable,
-		messagesDb,
-		updatesTable,
-		updatesDb,
+		tableName,
+		dbName,
 	}),
 )
 
-const storeUpdateInTimeseries = (timeseries: TimestreamWrite) => async (
-	event: UpdatedDeviceState,
+const storeRecordsInTimeseries = (timeseries: TimestreamWrite) => async (
+	Records: TimestreamWrite.Records,
 ): Promise<void> => {
+	if (Records.length === 0) {
+		console.log({
+			storeRecordsInTimeseries: 'No records to store.',
+		})
+		return
+	}
 	const args = {
-		DatabaseName: updatesDb,
-		TableName: updatesTable,
-		Records: toTimestreamRecords(event),
+		DatabaseName: dbName,
+		TableName: tableName,
+		Records,
 	}
 	console.log(JSON.stringify(args))
-	await timeseries.writeRecords(args).promise()
+	const request = timeseries.writeRecords(args)
+	try {
+		await request.promise()
+	} catch (err) {
+		const RejectedRecords = JSON.parse(
+			(request as any).response.httpResponse.body.toString(),
+		).RejectedRecords
+		if (RejectedRecords !== undefined) {
+			console.error({
+				RejectedRecords,
+			})
+		}
+		throw new Error(`${err.code}: ${err.message}`)
+	}
 }
 
-const storeUpdate = storeUpdateInTimeseries(new TimestreamWrite())
+const storeUpdate = storeRecordsInTimeseries(new TimestreamWrite())
 
 /**
  * Processes device messages and updates and stores the in Timestream
  */
-export const handler = async (event: UpdatedDeviceState): Promise<void> => {
+export const handler = async (
+	event: UpdatedDeviceState | DeviceMessage | BatchMessage,
+): Promise<void> => {
 	console.log(JSON.stringify(event))
-	if ('reported' in event) {
-		await storeUpdate(event)
+
+	try {
+		if ('reported' in event) {
+			await storeUpdate(shadowUpdateToTimestreamRecords(event))
+			return
+		}
+		if ('message' in event) {
+			await storeUpdate(messageToTimestreamRecords(event))
+			return
+		}
+		if ('batch' in event) {
+			await storeUpdate(batchToTimestreamRecords(event))
+			return
+		}
+		console.error(
+			JSON.stringify({
+				error: 'Unknown event',
+				event,
+			}),
+		)
+	} catch (err) {
+		console.error(err)
+		console.error(
+			JSON.stringify({
+				error: err.message,
+			}),
+		)
 		return
 	}
-	console.error(
-		JSON.stringify({
-			error: 'Unknown event',
-			event,
-		}),
-	)
 }

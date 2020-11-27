@@ -1,30 +1,54 @@
+type SensorWithTimestamp = {
+	v: unknown
+	ts: number
+}
+
+type NumberValueSensor = SensorWithTimestamp & {
+	v: number
+}
+
+type NumbersValueSensor = SensorWithTimestamp & {
+	v: Record<string, number>
+}
+
+type NumbersAndStringsValueSensor = SensorWithTimestamp & {
+	v: Record<string, number | string>
+}
+
 type UpdatedDeviceState = {
 	reported: {
 		cfg?: Record<string, number | boolean>
-		bat?: {
+		bat?: NumberValueSensor
+		env?: NumbersValueSensor
+		acc?: NumbersValueSensor
+		gps?: NumbersValueSensor
+		dev?: NumbersAndStringsValueSensor
+		roam?: NumbersAndStringsValueSensor
+	}
+	timestamp: number
+	deviceId: string
+}
+
+type DeviceMessage = {
+	message: {
+		btn?: {
 			v: number
 			ts: number
 		}
-		env?: {
-			v: Record<string, number>
-			ts: number
-		}
-		acc?: {
-			v: Record<string, number>
-			ts: number
-		}
-		gps?: {
-			v: Record<string, number>
-			ts: number
-		}
-		dev?: {
-			v: Record<string, number | string>
-			ts: number
-		}
-		roam?: {
-			v: Record<string, number | string>
-			ts: number
-		}
+	}
+	timestamp: number
+	deviceId: string
+}
+
+type BatchMessage = {
+	batch: {
+		btn?: NumberValueSensor[]
+		bat?: NumberValueSensor[]
+		env?: NumbersValueSensor[]
+		acc?: NumbersValueSensor[]
+		gps?: NumbersValueSensor[]
+		dev?: NumbersAndStringsValueSensor[]
+		roam?: NumbersAndStringsValueSensor[]
 	}
 	timestamp: number
 	deviceId: string

@@ -14,7 +14,7 @@ import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { bifravstStepRunners } from './steps/bifravst'
-import { STS, CloudFormation, Iot } from 'aws-sdk'
+import { STS, CloudFormation, Iot, TimestreamQuery } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
 import {
@@ -25,6 +25,7 @@ import { promises as fs } from 'fs'
 import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
+import { timestreamStepRunners } from './steps/timestream'
 
 let ran = false
 
@@ -32,8 +33,8 @@ export type BifravstWorld = StackOutputs & {
 	accountId: string
 	region: string
 	userIotPolicyName: string
-	historicalMessagesTableName: string
-	historicalUpdatesTableName: string
+	historicaldataTableName: string
+	historicaldataDatabaseName: string
 	'firmwareCI:userAccessKeyId': string
 	'firmwareCI:userSecretAccessKey': string
 	'firmwareCI:thingGroupName': string
@@ -83,6 +84,11 @@ program
 				.getCallerIdentity()
 				.promise()
 
+			const [
+				historicaldataDatabaseName,
+				historicaldataTableName,
+			] = stackConfig.historicaldataTableInfo.split('|')
+
 			const world: BifravstWorld = {
 				...stackConfig,
 				'firmwareCI:userAccessKeyId': firmwareCIStackConfig.userAccessKeyId,
@@ -91,8 +97,8 @@ program
 				'firmwareCI:thingGroupName': firmwareCIStackConfig.thingGroupName,
 				'firmwareCI:bucketName': firmwareCIStackConfig.bucketName,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
-				historicalMessagesTableName: stackConfig.historicalMessagesTableName,
-				historicalUpdatesTableName: stackConfig.historicalUpdatesTableName,
+				historicaldataTableName,
+				historicaldataDatabaseName,
 				region,
 				accountId: accountId as string,
 				awsIotRootCA: await fs.readFile(
@@ -205,6 +211,11 @@ program
 									)
 								},
 							}),
+						}),
+					)
+					.addStepRunners(
+						timestreamStepRunners({
+							timestream: new TimestreamQuery({ region }),
 						}),
 					)
 					.run()

@@ -13,7 +13,6 @@ import { LambdasWithLayer } from './LambdasWithLayer'
  */
 export class HistoricalData extends CloudFormation.Resource {
 	public readonly db: Timestream.CfnDatabase
-	public readonly messagesTable: Timestream.CfnTable
 	public readonly updatesTable: Timestream.CfnTable
 
 	public constructor(
@@ -30,17 +29,18 @@ export class HistoricalData extends CloudFormation.Resource {
 		super(parent, id)
 
 		this.db = new Timestream.CfnDatabase(this, 'db')
-		this.messagesTable = new Timestream.CfnTable(this, 'messagesTable', {
-			databaseName: this.db.ref,
-		})
 		this.updatesTable = new Timestream.CfnTable(this, 'updatesTable', {
 			databaseName: this.db.ref,
+			retentionProperties: {
+				MemoryStoreRetentionPeriodInHours: '24',
+				MagneticStoreRetentionPeriodInDays: '365',
+			},
 		})
 
 		// User permissions
 		userRole.addToPrincipalPolicy(
 			new IAM.PolicyStatement({
-				resources: [this.messagesTable.attrArn, this.updatesTable.attrArn],
+				resources: [this.updatesTable.attrArn],
 				actions: [
 					'timestream:Select',
 					'timestream:DescribeTable',
@@ -75,7 +75,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['timestream:WriteRecords'],
-					resources: [this.messagesTable.attrArn, this.updatesTable.attrArn],
+					resources: [this.updatesTable.attrArn],
 				}),
 				new IAM.PolicyStatement({
 					actions: ['timestream:DescribeEndpoints'],
@@ -83,8 +83,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				}),
 			],
 			environment: {
-				MESSAGES_TABLE_NAME: this.messagesTable.ref,
-				UPDATES_TABLE_NAME: this.updatesTable.ref,
+				TABLE_INFO: this.updatesTable.ref,
 				VERSION: this.node.tryGetContext('version'),
 			},
 		})
@@ -174,7 +173,7 @@ export class HistoricalData extends CloudFormation.Resource {
 						'Processes all batch messages and store them in Timestream',
 					ruleDisabled: false,
 					sql:
-						"SELECT * as message, clientid() as deviceId, newuuid() as messageId, timestamp() as timestamp FROM '+/batch'",
+						"SELECT * as batch, clientid() as deviceId, timestamp() as timestamp FROM '+/batch'",
 					actions: [
 						{
 							lambda: {

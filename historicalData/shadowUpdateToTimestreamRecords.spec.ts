@@ -1,12 +1,12 @@
-import { toTimestreamRecords } from './toTimestreamRecords'
+import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
 
-describe('toTimestreamRecords', () => {
-	it('should convert an event to Timestream records', () => {
+describe('shadowUpdateToTimestreamRecords', () => {
+	it('should convert a shadow update to Timestream records', () => {
 		const Dimensions = [
 			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
 		]
 		expect(
-			toTimestreamRecords({
+			shadowUpdateToTimestreamRecords({
 				reported: {
 					cfg: {
 						act: false,

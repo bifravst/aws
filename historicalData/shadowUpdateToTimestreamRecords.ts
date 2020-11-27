@@ -1,27 +1,8 @@
-import { toTimestreamType } from './toTimestreamType'
 import { TimestreamWrite } from 'aws-sdk'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
+import { toRecord } from './toRecord'
 
-const toRecord = (Dimensions: TimestreamWrite.Dimensions) => ({
-	name,
-	ts,
-	v,
-}: {
-	name: string
-	ts: number
-	v?: any
-}) => {
-	if (v === undefined) return
-	return {
-		Dimensions,
-		MeasureName: name,
-		MeasureValue: v.toString(),
-		MeasureValueType: toTimestreamType(v),
-		Time: ts.toString(),
-	}
-}
-
-export const toTimestreamRecords = (
+export const shadowUpdateToTimestreamRecords = (
 	event: UpdatedDeviceState,
 ): TimestreamWrite.Records => {
 	const r = toRecord([

@@ -32,6 +32,7 @@
     "@bifravst/firmware-ci": "4.1.4",
     "@bifravst/object-to-env": "1.0.0",
     "@bifravst/random-words": "4.2.1",
+    "@bifravst/timestream-helpers": "^1.0.0",
     "@octokit/rest": "18.0.9",
     "ajv": "6.12.6",
     "aws-iot-device-sdk": "2.2.6",
