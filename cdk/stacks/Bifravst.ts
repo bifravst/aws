@@ -391,7 +391,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		new CloudFormation.CfnOutput(this, 'historicaldataTableInfo', {
-			value: hd.updatesTable.ref,
+			value: hd.table.ref,
 			exportName: `${this.stackName}:historicaldataTableInfo`,
 		})
 

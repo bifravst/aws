@@ -3,52 +3,23 @@ import { fromEnv } from '../util/fromEnv'
 import { batchToTimestreamRecords } from './batchToTimestreamRecords'
 import { messageToTimestreamRecords } from './messageToTimestreamRecords'
 import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
+import { storeRecordsInTimeseries } from './storeRecordsInTimeseries'
 
 const { tableInfo } = fromEnv({
 	tableInfo: 'TABLE_INFO',
 })(process.env)
 
-const [dbName, tableName] = tableInfo.split('|')
+const [DatabaseName, TableName] = tableInfo.split('|')
 
-console.log(
-	JSON.stringify({
-		tableName,
-		dbName,
-	}),
-)
-
-const storeRecordsInTimeseries = (timeseries: TimestreamWrite) => async (
-	Records: TimestreamWrite.Records,
-): Promise<void> => {
-	if (Records.length === 0) {
-		console.log({
-			storeRecordsInTimeseries: 'No records to store.',
-		})
-		return
-	}
-	const args = {
-		DatabaseName: dbName,
-		TableName: tableName,
-		Records,
-	}
-	console.log(JSON.stringify(args))
-	const request = timeseries.writeRecords(args)
-	try {
-		await request.promise()
-	} catch (err) {
-		const RejectedRecords = JSON.parse(
-			(request as any).response.httpResponse.body.toString(),
-		).RejectedRecords
-		if (RejectedRecords !== undefined) {
-			console.error({
-				RejectedRecords,
-			})
-		}
-		throw new Error(`${err.code}: ${err.message}`)
-	}
+const store = storeRecordsInTimeseries({
+	timestream: new TimestreamWrite(),
+	DatabaseName,
+	TableName,
+})
+const storeUpdate = async (Records: TimestreamWrite.Records) => {
+	console.log({ DatabaseName, TableName, Records })
+	return store(Records)
 }
-
-const storeUpdate = storeRecordsInTimeseries(new TimestreamWrite())
 
 /**
  * Processes device messages and updates and stores the in Timestream

@@ -12,8 +12,7 @@ import { LambdasWithLayer } from './LambdasWithLayer'
  * Provides resources for historical data
  */
 export class HistoricalData extends CloudFormation.Resource {
-	public readonly db: Timestream.CfnDatabase
-	public readonly updatesTable: Timestream.CfnTable
+	public readonly table: Timestream.CfnTable
 
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -28,9 +27,9 @@ export class HistoricalData extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		this.db = new Timestream.CfnDatabase(this, 'db')
-		this.updatesTable = new Timestream.CfnTable(this, 'updatesTable', {
-			databaseName: this.db.ref,
+		const db = new Timestream.CfnDatabase(this, 'db')
+		this.table = new Timestream.CfnTable(this, 'table', {
+			databaseName: db.ref,
 			retentionProperties: {
 				MemoryStoreRetentionPeriodInHours: '24',
 				MagneticStoreRetentionPeriodInDays: '365',
@@ -40,7 +39,7 @@ export class HistoricalData extends CloudFormation.Resource {
 		// User permissions
 		userRole.addToPrincipalPolicy(
 			new IAM.PolicyStatement({
-				resources: [this.updatesTable.attrArn],
+				resources: [this.table.attrArn],
 				actions: [
 					'timestream:Select',
 					'timestream:DescribeTable',
@@ -75,7 +74,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['timestream:WriteRecords'],
-					resources: [this.updatesTable.attrArn],
+					resources: [this.table.attrArn],
 				}),
 				new IAM.PolicyStatement({
 					actions: ['timestream:DescribeEndpoints'],
@@ -83,7 +82,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				}),
 			],
 			environment: {
-				TABLE_INFO: this.updatesTable.ref,
+				TABLE_INFO: this.table.ref,
 				VERSION: this.node.tryGetContext('version'),
 			},
 		})
