@@ -76,7 +76,6 @@ jobs:
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk bootstrap
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' deploy '*' --require-approval never
-          node cli historical-data --setup -d
           node cli create-ca
       - run: node --unhandled-rejections=strict dist/cdk/helper/addFakeRoute.js
       - name: Run End-to-End Tests
