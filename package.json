@@ -76,7 +76,7 @@
     "backoff": "2.5.0",
     "cdk": "1.75.0",
     "chalk": "4.1.0",
-    "change-case": "4.1.1",
+    "change-case": "4.1.2",
     "commander": "6.2.0",
     "date-fns": "2.16.1",
     "eslint": "7.14.0",
