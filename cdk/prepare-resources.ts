@@ -1,4 +1,4 @@
-import { Iot } from 'aws-sdk'
+import { IoTClient } from '@aws-sdk/client-iot'
 import * as path from 'path'
 import { promises as fs } from 'fs'
 import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
@@ -43,7 +43,7 @@ export const prepareResources = async ({
 }> => {
 	// Detect the AWS IoT endpoint
 	const endpointAddress = await getIotEndpoint(
-		new Iot({
+		new IoTClient({
 			region,
 		}),
 	)
@@ -116,7 +116,7 @@ export const prepareCDKLambdas = async ({
 				path.join(cloudFormationLayerDir, 'package.json'),
 				JSON.stringify({
 					dependencies: {
-						'aws-sdk': devDeps['aws-sdk'],
+						'@aws-sdk/client-iot': devDeps['@aws-sdk/client-iot'],
 						'@bifravst/cloudformation-helpers':
 							devDeps['@bifravst/cloudformation-helpers'],
 					},
