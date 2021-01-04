@@ -109,16 +109,16 @@ export const prepareCDKLambdas = async ({
 			} catch (_) {
 				await fs.mkdir(cloudFormationLayerDir)
 			}
-			const devDeps = JSON.parse(
+			const { devDependencies, dependencies } = JSON.parse(
 				await fs.readFile(path.resolve(rootDir, 'package.json'), 'utf-8'),
-			).devDependencies
+			)
 			await fs.writeFile(
 				path.join(cloudFormationLayerDir, 'package.json'),
 				JSON.stringify({
 					dependencies: {
-						'@aws-sdk/client-iot': devDeps['@aws-sdk/client-iot'],
+						'@aws-sdk/client-iot': dependencies['@aws-sdk/client-iot'],
 						'@bifravst/cloudformation-helpers':
-							devDeps['@bifravst/cloudformation-helpers'],
+							devDependencies['@bifravst/cloudformation-helpers'],
 					},
 				}),
 				'utf-8',
