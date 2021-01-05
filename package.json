@@ -54,7 +54,7 @@
     "@bifravst/cloudformation-helpers": "4.0.34",
     "@bifravst/code-style": "8.0.134",
     "@bifravst/device-ui-server": "2.0.2",
-    "@bifravst/e2e-bdd-test-runner": "4.0.52",
+    "@bifravst/e2e-bdd-test-runner": "4.0.53",
     "@bifravst/eslint-config-typescript": "5.0.86",
     "@bifravst/firmware-ci": "5.0.0",
     "@bifravst/object-to-env": "1.0.1",
