@@ -18,7 +18,6 @@ import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
 import { v4 } from 'uuid'
-import { region } from '../cdk/regions'
 import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
@@ -34,7 +33,6 @@ let ran = false
 
 export type BifravstWorld = StackOutputs & {
 	accountId: string
-	region: string
 	userIotPolicyName: string
 	historicaldataTableName: string
 	historicaldataDatabaseName: string
@@ -76,16 +74,16 @@ program
 				progress,
 				retry,
 			} = options
-			const cf = new CloudFormationClient({ region })
+			const cf = new CloudFormationClient({})
 			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
 
 			const firmwareCIStackConfig = await stackOutput(
 				cf,
 			)<FirmwareCIStackOutputs>(ciStackName)
 
-			const { Account: accountId } = await new STSClient({
-				region,
-			}).send(new GetCallerIdentityCommand({}))
+			const { Account: accountId } = await new STSClient({}).send(
+				new GetCallerIdentityCommand({}),
+			)
 
 			const [
 				historicaldataDatabaseName,
@@ -102,7 +100,6 @@ program
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				historicaldataTableName,
 				historicaldataDatabaseName,
-				region,
 				accountId: accountId as string,
 				awsIotRootCA: await fs.readFile(
 					path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
@@ -141,7 +138,6 @@ program
 					)
 					.addStepRunners(
 						awsSdkStepRunners({
-							region: world.region,
 							constructorArgs: {
 								IotData: {
 									endpoint: world.mqttEndpoint,
@@ -153,7 +149,7 @@ program
 					.addStepRunners(
 						firmwareCIStepRunners({
 							...world,
-							iot: new IoTClient({ region }),
+							iot: new IoTClient({}),
 						}),
 					)
 					.addStepRunners(storageStepRunners())
@@ -218,7 +214,7 @@ program
 					)
 					.addStepRunners(
 						timestreamStepRunners({
-							timestream: await getTimestreamQueryClient({ region }),
+							timestream: await getTimestreamQueryClient(),
 						}),
 					)
 					.run()

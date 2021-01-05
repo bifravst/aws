@@ -7,19 +7,16 @@ import {
 } from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { paginate } from '../../util/paginate'
-import { region } from '../../cdk/regions'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const purgeIotUserPolicyPrincipals = (): CommandDefinition => ({
 	command: 'purge-iot-user-policy-principals',
 	action: async () => {
 		const { userIotPolicyArn } = {
-			...(await stackOutput(new CloudFormationClient({ region }))(
-				CORE_STACK_NAME,
-			)),
+			...(await stackOutput(new CloudFormationClient({}))(CORE_STACK_NAME)),
 		} as { [key: string]: string }
 		const policyName = userIotPolicyArn?.split('/').pop() as string
-		const iot = new IoTClient({ region })
+		const iot = new IoTClient({})
 		await paginate({
 			paginator: async (marker?: any) => {
 				const { principals, nextMarker } = await iot.send(

@@ -10,13 +10,12 @@ import {
 } from '@aws-sdk/client-ssm'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
-import { region } from '../../cdk/regions'
 import { listPipelines } from '../cd/listPipelines'
 
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',
 	action: async (token: string) => {
-		const ssm = new SSMClient({ region })
+		const ssm = new SSMClient({})
 		try {
 			await ssm.send(
 				new DeleteParameterCommand({
@@ -34,7 +33,7 @@ export const cdUpdateTokenCommand = (): CommandDefinition => ({
 			}),
 		)
 
-		const cp = new CodePipelineClient({ region })
+		const cp = new CodePipelineClient({})
 		const pipelines = await listPipelines()
 		await Promise.all(
 			pipelines.map(async (name) => {

@@ -9,7 +9,6 @@ import {
 } from '@aws-sdk/client-cloudwatch-logs'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
-import { region } from '../../cdk/regions'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const logsCommand = (): CommandDefinition => ({
@@ -25,8 +24,8 @@ export const logsCommand = (): CommandDefinition => ({
 		},
 	],
 	action: async ({ numLogGroups, numLogStreams }) => {
-		const cf = new CloudFormationClient({ region })
-		const logs = new CloudWatchLogsClient({ region })
+		const cf = new CloudFormationClient({})
+		const logs = new CloudWatchLogsClient({})
 
 		const logGroups =
 			(

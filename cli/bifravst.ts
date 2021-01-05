@@ -18,22 +18,19 @@ import { CommandDefinition } from './commands/CommandDefinition'
 import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
 import { purgeCAsCommand } from './commands/purge-cas'
-import { region } from '../cdk/regions'
 import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 import { flashCommand } from './commands/flash'
 import { deviceUIConfigCommand } from './commands/device-ui-config'
 
-const iot = new IoTClient({
-	region,
-})
+const iot = new IoTClient({})
 const version = JSON.parse(
 	fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
 ).version
 
 const config = async () => {
 	const [accessKeyInfo, endpoint] = await Promise.all([
-		new STSClient({ region }).send(new GetCallerIdentityCommand({})),
+		new STSClient({}).send(new GetCallerIdentityCommand({})),
 		getIotEndpoint(iot),
 	])
 

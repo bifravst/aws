@@ -3,7 +3,6 @@ import {
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	CORE_STACK_NAME,
 } from '../../cdk/stacks/stackName'
-import { region } from '../../cdk/regions'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { StackOutputs } from '../../cdk/stacks/ContinuousDeployment'
 
@@ -11,7 +10,7 @@ import { StackOutputs } from '../../cdk/stacks/ContinuousDeployment'
  * Returns the active pipelines of the CD stack
  */
 export const listPipelines = async (): Promise<string[]> => {
-	const cf = new CloudFormationClient({ region })
+	const cf = new CloudFormationClient({})
 	const config = await stackOutput(cf)<StackOutputs>(
 		CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	)

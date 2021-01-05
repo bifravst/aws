@@ -2,7 +2,6 @@ import { CommandDefinition } from './CommandDefinition'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as chalk from 'chalk'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { region } from '../../cdk/regions'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const infoCommand = (): CommandDefinition => ({
@@ -14,7 +13,7 @@ export const infoCommand = (): CommandDefinition => ({
 		},
 	],
 	action: async ({ output }) => {
-		const outputs = await stackOutput(new CloudFormationClient({ region }))(
+		const outputs = await stackOutput(new CloudFormationClient({}))(
 			CORE_STACK_NAME,
 		)
 		if (output !== undefined) {

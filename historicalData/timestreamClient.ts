@@ -8,42 +8,32 @@ import {
 	DescribeEndpointsCommand as DescribeQueryEndpointsCommand,
 } from '@aws-sdk/client-timestream-query'
 
-export const getTimestreamWriteClient = async (
-	{
-		region,
-	}: {
-		region?: string
-	} = { region: process.env.AWS_REGION },
-): Promise<TimestreamWriteClient> =>
-	new TimestreamWriteClient({ region })
-		.send(new DescribeWriteEndpointsCommand({ region }))
+export const getTimestreamWriteClient = async (): Promise<TimestreamWriteClient> =>
+	new TimestreamWriteClient({})
+		.send(new DescribeWriteEndpointsCommand({}))
 		.then(
 			({ Endpoints }) =>
 				new TimestreamWriteClient({
-					region,
 					endpoint: `https://${
 						Endpoints?.[0].Address ??
-						`ingest-cell1.timestream.${region}.amazonaws.com`
+						`ingest-cell1.timestream.${
+							process.env.AWS_REGION ?? 'us-east-1'
+						}.amazonaws.com`
 					}`,
 				}),
 		)
 
-export const getTimestreamQueryClient = async (
-	{
-		region,
-	}: {
-		region?: string
-	} = { region: process.env.AWS_REGION },
-): Promise<TimestreamQueryClient> =>
-	new TimestreamQueryClient({ region })
-		.send(new DescribeQueryEndpointsCommand({ region }))
+export const getTimestreamQueryClient = async (): Promise<TimestreamQueryClient> =>
+	new TimestreamQueryClient({})
+		.send(new DescribeQueryEndpointsCommand({}))
 		.then(
 			({ Endpoints }) =>
 				new TimestreamQueryClient({
-					region,
 					endpoint: `https://${
 						Endpoints?.[0].Address ??
-						`query-cell1.timestream.${region}.amazonaws.com`
+						`query-cell1.timestream.${
+							process.env.AWS_REGION ?? 'us-east-1'
+						}.amazonaws.com`
 					}`,
 				}),
 		)

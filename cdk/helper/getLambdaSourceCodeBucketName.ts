@@ -4,9 +4,7 @@ import {
 } from '@aws-sdk/client-cloudformation'
 import { SOURCECODE_STACK_NAME } from '../stacks/stackName'
 
-const cf = new CloudFormationClient({
-	region: process.env.AWS_DEFAULT_REGION,
-})
+const cf = new CloudFormationClient({})
 
 export const getLambdaSourceCodeBucketName = async (): Promise<string> => {
 	const StackName = SOURCECODE_STACK_NAME

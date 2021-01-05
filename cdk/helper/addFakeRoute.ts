@@ -6,7 +6,6 @@ import {
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { StackOutputs } from '../stacks/Bifravst'
 import { CORE_STACK_NAME } from '../stacks/stackName'
-import { region } from '../regions'
 import { v4 } from 'uuid'
 
 /**
@@ -17,10 +16,10 @@ import { v4 } from 'uuid'
  */
 const main = async () => {
 	const { geolocationApiId } = await stackOutput(
-		new CloudFormationClient({ region }),
+		new CloudFormationClient({}),
 	)<StackOutputs>(CORE_STACK_NAME)
 
-	const r = await new ApiGatewayV2Client({ region }).send(
+	const r = await new ApiGatewayV2Client({}).send(
 		new CreateRouteCommand({
 			ApiId: geolocationApiId,
 			RouteKey: `GET /__fake_${v4()}`,

@@ -31,10 +31,8 @@ export type BifravstLambdas = {
 }
 
 export const prepareResources = async ({
-	region,
 	rootDir,
 }: {
-	region: string
 	rootDir: string
 }): Promise<{
 	mqttEndpoint: string
@@ -42,17 +40,15 @@ export const prepareResources = async ({
 	sourceCodeBucketName: string
 }> => {
 	// Detect the AWS IoT endpoint
-	const endpointAddress = await getIotEndpoint(
-		new IoTClient({
-			region,
-		}),
-	)
+	const endpointAddress = await getIotEndpoint(new IoTClient({}))
 
-	if (!supportedRegions.includes(region)) {
+	if (!supportedRegions.includes(process.env.AWS_REGION ?? 'us-east-1')) {
 		console.log(
 			chalk.yellow.inverse.bold(' WARNING '),
 			chalk.yellow(
-				`Your region ${region} is not in the list of supported regions!`,
+				`Your region ${
+					process.env.AWS_REGION ?? 'us-east-1'
+				} from the environment variable AWS_REGION is not in the list of supported regions!`,
 			),
 		)
 		console.log(

@@ -6,17 +6,15 @@ import {
 } from './prepare-resources'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
-import { region } from './regions'
 
 const fetchUnwiredLabsApiSettings = getApiSettings({
-	ssm: new SSMClient({ region }),
+	ssm: new SSMClient({}),
 })
 
 const rootDir = process.cwd()
 
 Promise.all([
 	prepareResources({
-		region,
 		rootDir,
 	}).then(async (res) => ({
 		...res,

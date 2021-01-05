@@ -11,7 +11,6 @@ import {
 } from '@aws-sdk/client-s3'
 import * as chalk from 'chalk'
 import { retry } from './retry'
-import { region } from '../../cdk/regions'
 import {
 	CORE_STACK_NAME,
 	DEVICEUI_STACK_NAME,
@@ -21,7 +20,7 @@ import {
 } from '../../cdk/stacks/stackName'
 import { paginate } from '../../util/paginate'
 
-const cf = new CloudFormationClient({ region })
+const cf = new CloudFormationClient({})
 
 const listBuckets = async (StackName: string) =>
 	cf
@@ -48,7 +47,7 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 			...(await listBuckets(CONTINUOUS_DEPLOYMENT_STACK_NAME)),
 			...(await listBuckets(FIRMWARE_CI_STACK_NAME)),
 		]
-		const s3 = new S3Client({ region })
+		const s3 = new S3Client({})
 		await Promise.all(
 			buckets
 				.filter((b) => b)
