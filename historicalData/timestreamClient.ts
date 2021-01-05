@@ -20,6 +20,7 @@ export const getTimestreamWriteClient = async (
 		.then(
 			({ Endpoints }) =>
 				new TimestreamWriteClient({
+					region,
 					endpoint: `https://${
 						Endpoints?.[0].Address ??
 						`ingest-cell1.timestream.${region}.amazonaws.com`
@@ -39,6 +40,7 @@ export const getTimestreamQueryClient = async (
 		.then(
 			({ Endpoints }) =>
 				new TimestreamQueryClient({
+					region,
 					endpoint: `https://${
 						Endpoints?.[0].Address ??
 						`query-cell1.timestream.${region}.amazonaws.com`
