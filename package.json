@@ -68,7 +68,7 @@
     "@bifravst/eslint-config-typescript": "5.0.86",
     "@bifravst/firmware-ci": "5.0.0",
     "@bifravst/object-to-env": "1.0.1",
-    "@bifravst/package-layered-lambdas": "4.0.0",
+    "@bifravst/package-layered-lambdas": "4.0.1",
     "@bifravst/random-words": "4.2.1",
     "@bifravst/timestream-helpers": "2.0.0",
     "@commitlint/cli": "11.0.0",
