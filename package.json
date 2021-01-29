@@ -97,7 +97,7 @@
     "nock": "13.0.6",
     "octokit-auth-netrc": "1.0.0",
     "prettier": "2.2.1",
-    "ts-jest": "26.4.4",
+    "ts-jest": "26.5.0",
     "typescript": "4.1.3"
   },
   "husky": {
