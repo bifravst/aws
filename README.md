@@ -1,3 +1,6 @@
+> **:truck: moved to https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js**  
+> :information_source: [more info](https://github.com/bifravst/bifravst/issues/56)
+
 # AWS-based implementation of _Bifravst :smirk_cat::rainbow:_ [![npm version](https://img.shields.io/npm/v/@bifravst/aws.svg)](https://www.npmjs.com/package/@bifravst/aws)
 
 [![GitHub Actions](https://github.com/bifravst/aws/workflows/Test%20and%20Release/badge.svg)](https://github.com/bifravst/aws/actions)
