@@ -44,7 +44,7 @@
     "@bifravst/random-words": "4.2.1",
     "@bifravst/timestream-helpers": "2.2.0",
     "ajv": "7.0.4",
-    "fp-ts": "2.9.3",
+    "fp-ts": "2.9.4",
     "uuid": "8.3.2"
   },
   "devDependencies": {
